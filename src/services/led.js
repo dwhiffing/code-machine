@@ -81,7 +81,7 @@ const createLedGlassReflection = (v) => {
   const val = smoothstep(1, 0.6, d) * smoothstep(0.2, 0.5, dm)
   return newCol(val, val, val, val)
 }
-export const createLedSprite = (size = 21) =>
+export const createBulb = (size = 21) =>
   generateImage(size, size, (v) => {
     const cv = subV(v, halfV)
     const innerShadow = createInnerShadow(cv)

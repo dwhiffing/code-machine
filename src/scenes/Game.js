@@ -19,6 +19,11 @@ export default class extends Phaser.Scene {
     this.nodes.push(light3)
     this.nodes.push(light4)
 
+    this.input.on('drag', (_, object, x, y) => {
+      object.setPosition(x, y)
+      object.children?.forEach((c) => c.setPosition(x, y))
+    })
+
     this.wireService = new WireService(this)
     this.wireService.connect(light, light2)
     this.wireService.connect(light3, light4)
@@ -62,5 +67,13 @@ export default class extends Phaser.Scene {
 
   update() {
     this.wireService.update()
+  }
+
+  drawCanvas(image, size) {
+    const key = 'key' + Date.now()
+    const canvas = this.textures.createCanvas(key, size * 3, size * 3)
+    canvas.context.drawImage(image, size, size)
+    canvas.refresh()
+    return key
   }
 }
