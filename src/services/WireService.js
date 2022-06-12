@@ -1,3 +1,5 @@
+import { Wire } from '../sprites/Wire'
+
 export default class WireService {
   constructor(scene) {
     this.scene = scene
@@ -12,9 +14,16 @@ export default class WireService {
     })
   }
 
-  update() {}
+  update() {
+    this.wires.forEach((e) => {
+      e.update()
+    })
+  }
 
-  connect(nodeA, nodeB) {}
+  connect = (nodeA, nodeB) => {
+    const wire = new Wire(this.scene, nodeA, nodeB)
+    this.wires.push(wire)
+  }
 
   checkPower = () => {
     // TODO: not dealing with forks properly
