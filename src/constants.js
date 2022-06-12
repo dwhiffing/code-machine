@@ -1,0 +1,17 @@
+export const LEVEL = [
+  { key: 'Light-0', x: 1500, y: 500 },
+  { key: 'Switch-1', x: 950, y: 200 },
+  { key: 'PositiveCell-2', x: 400, y: 450 },
+  { key: 'NegativeCell-3', x: 400, y: 550 },
+  { key: 'Node-4', x: 400, y: 800 },
+  { key: 'Node-5', x: 1500, y: 800 },
+  { key: 'Node-6', x: 1500, y: 200 },
+  { key: 'Node-7', x: 400, y: 200 },
+  { key: 'Wire-8', input: 'NegativeCell-3', output: 'Node-4' },
+  { key: 'Wire-9', input: 'Node-4', output: 'Node-5' },
+  { key: 'Wire-10', input: 'Light-0', output: 'Node-5' },
+  { key: 'Wire-11', input: 'Light-0', output: 'Node-6' },
+  { key: 'Wire-12', input: 'Switch-1', output: 'Node-6' },
+  { key: 'Wire-13', input: 'Switch-1', output: 'Node-7' },
+  { key: 'Wire-14', input: 'PositiveCell-2', output: 'Node-7' },
+]

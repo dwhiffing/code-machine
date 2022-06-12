@@ -1,6 +1,10 @@
+import { LEVEL } from '../constants'
 import WireService from '../services/WireService'
+import { NegativeCell, PositiveCell } from '../sprites/Cell'
 import { Light } from '../sprites/Light'
 import { Node } from '../sprites/Node'
+import { Switch } from '../sprites/Switch'
+const SPRITES = { NegativeCell, PositiveCell, Light, Node, Switch }
 
 export default class extends Phaser.Scene {
   constructor() {
@@ -10,15 +14,9 @@ export default class extends Phaser.Scene {
   init() {}
 
   create() {
-    this.nodes = []
-    const node = new Node(this, 200, 200)
-    const node2 = new Node(this, 500, 500)
-    const node3 = new Node(this, 700, 500)
-    const node4 = new Light(this, 800, 800)
-    this.nodes.push(node)
-    this.nodes.push(node2)
-    this.nodes.push(node3)
-    this.nodes.push(node4)
+    this.nodes = LEVEL.filter((o) => !o.key.match(/^Wire/)).map(
+      (o) => new SPRITES[o.key.split('-')[0]](this, o.x, o.y),
+    )
 
     this.input.on('drag', (_, object, x, y) => {
       object.setPosition(x, y)
@@ -26,10 +24,13 @@ export default class extends Phaser.Scene {
     })
 
     this.wireService = new WireService(this)
-    this.wireService.connect(node, node2)
-    this.wireService.connect(node3, node4)
-    this.wireService.connect(node, node3)
-    this.wireService.connect(node4, node)
+
+    LEVEL.filter((o) => o.key.match(/^Wire/)).forEach((o) =>
+      this.wireService.connect(
+        this.nodes.find((n) => n.key === o.input),
+        this.nodes.find((n) => n.key === o.output),
+      ),
+    )
 
     this.input.on('pointerdown', (p, objects) => {
       if (objects.length === 0)
@@ -38,7 +39,7 @@ export default class extends Phaser.Scene {
 
     this.input.on('pointermove', (p) => {
       const nodes = this.getChildren().filter((p) => p.placing)
-      nodes.forEach((n) => n.bulb.setPosition(p.x, p.y))
+      nodes.forEach((n) => n.sprite.setPosition(p.x, p.y))
     })
 
     this.input.keyboard.on('keyup', (e) => {
@@ -47,11 +48,21 @@ export default class extends Phaser.Scene {
           .filter((w) => w.selected)
           .forEach((s) => s.destroy())
       }
+      if (e.key === '3') {
+        const exported = this.getChildren().map((c) => {
+          let e = { key: c.key }
+          if (e.key.match(/^Wire/)) {
+            return { ...e, input: c.input.key, output: c.output.key }
+          } else {
+            return { ...e, x: Math.round(c.x), y: Math.round(c.y) }
+          }
+        })
+        navigator.clipboard.writeText(JSON.stringify(exported))
+      }
       if (e.key === '1') {
-        const node = new Light(this, 1200, 800)
-        const pointer = this.input.activePointer
+        const node = new Node(this, 1200, 800)
         node.placing = true
-        node.bulb.setPosition(pointer)
+        node.sprite.setPosition(this.input.activePointer)
         this.nodes.push(node)
       }
       if (e.key === '2') {

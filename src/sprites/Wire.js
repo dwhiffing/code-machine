@@ -8,7 +8,7 @@ export class Wire extends Base {
     const dist = Distance.BetweenPoints(input, output)
     const sprite = scene.add.rectangle(0, 0, 10, dist, 0x333333)
     sprite.setInteractive()
-    super(scene, sprite, 10)
+    super(scene, sprite, 'Wire')
     this.scene = scene
     this.input = input
     this.output = output

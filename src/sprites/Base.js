@@ -1,5 +1,7 @@
+let id = 0
 export class Base {
-  constructor(scene, sprite) {
+  constructor(scene, sprite, type = 'base') {
+    this.key = `${type}-${id++}`
     this.scene = scene
     this.selected = false
     this.sprite = sprite
