@@ -25,13 +25,21 @@ export default class extends Phaser.Scene {
     this.wireService.connect(light, light3)
     this.wireService.connect(light4, light)
 
-    this.input.on('gameobjectdown', (_, sprite) => console.log(sprite), this)
+    this.input.on('pointerdown', (p, objects) => {
+      if (objects.length === 0)
+        this.getChildren().forEach((w) => w.toggleSelect(false))
+    })
 
-    // this.input.on('pointerdown', (p) => {)
-    // this.input.keyboard.on('keyup', (e) => {
-    //   if (e.key === 'x')
-    // })
+    this.input.keyboard.on('keyup', (e) => {
+      if (e.key === 'Backspace') {
+        this.getChildren()
+          .filter((w) => w.selected)
+          .forEach((s) => s.destroy())
+      }
+    })
   }
+
+  getChildren = () => [...this.nodes, ...this.wireService.wires]
 
   update() {
     this.wireService.update()
