@@ -16,13 +16,6 @@ export class Wire extends Base {
     this.sprite.setDepth(-1)
   }
 
-  highlight = () => (this.sprite.fillColor = this.value ? 0xaaaa00 : 0xaaaaaa)
-
-  unhighlight = () => (this.sprite.fillColor = this.value ? 0x333300 : 0x333333)
-
-  hoverHighlight = () =>
-    (this.sprite.fillColor = this.value ? 0x666600 : 0x666666)
-
   update() {
     const { x, y } = getMidPoint(this.input, this.output)
     const distance = Distance.BetweenPoints(this.input, this.output)

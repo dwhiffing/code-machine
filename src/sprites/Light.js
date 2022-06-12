@@ -13,6 +13,13 @@ export class Light extends Base {
 
     this.drawGlow(size)
   }
+
+  highlight = () => this.sprite.setTint?.(0xffffff)
+
+  unhighlight = () => this.sprite.setTint?.(0x999999)
+
+  hoverHighlight = () => this.sprite.setTint?.(0xcccccc)
+
   get value() {
     return super.value
   }

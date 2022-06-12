@@ -45,9 +45,14 @@ export class Base {
     const offset = Math.abs(e.downX - e.upX) + Math.abs(e.downY - e.upY)
     if (offset !== 0) return
 
-    this.toggleSelect()
+    if (this.scene.mode === 0) {
+      this.interact()
+    } else {
+      this.toggleSelect()
+    }
   }
 
+  interact = () => {}
   onHover = (isOver = true) => {
     this.hovered = isOver
     if (this.hovered) this.hoverHighlight()
@@ -66,11 +71,12 @@ export class Base {
     if (!this.selected && this.hovered) this.hoverHighlight()
   }
 
-  highlight = () => this.sprite.setTint?.(0xffffff)
+  highlight = () => (this.sprite.fillColor = this.value ? 0xaaaa00 : 0xaaaaaa)
 
-  unhighlight = () => this.sprite.setTint?.(0x999999)
+  unhighlight = () => (this.sprite.fillColor = this.value ? 0x333300 : 0x333333)
 
-  hoverHighlight = () => this.sprite.setTint?.(0xcccccc)
+  hoverHighlight = () =>
+    (this.sprite.fillColor = this.value ? 0x666600 : 0x666666)
 
   destroy() {
     this.scene.wireService.removeWires(this.key)

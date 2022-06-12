@@ -7,11 +7,4 @@ export class Node extends Base {
     scene.input.setDraggable(sprite)
     super(scene, sprite, 'Node')
   }
-
-  highlight = () => (this.sprite.fillColor = this.value ? 0xaaaa00 : 0xaaaaaa)
-
-  unhighlight = () => (this.sprite.fillColor = this.value ? 0x333300 : 0x333333)
-
-  hoverHighlight = () =>
-    (this.sprite.fillColor = this.value ? 0x666600 : 0x666666)
 }

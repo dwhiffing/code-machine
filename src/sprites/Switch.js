@@ -9,9 +9,8 @@ export class Switch extends Base {
     this.value = 1
   }
 
-  highlight = () => (this.sprite.fillColor = 0xaaaaaa)
-
-  unhighlight = () => (this.sprite.fillColor = 0x333333)
-
-  hoverHighlight = () => (this.sprite.fillColor = 0x666666)
+  interact = () => {
+    this.value = this.value ? 0 : 1
+    this.scene.wireService.checkPower()
+  }
 }

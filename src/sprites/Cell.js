@@ -12,6 +12,12 @@ export class Cell extends Base {
     super(scene, sprite, type)
   }
 
+  highlight = () => this.sprite.setTint?.(0xffffff)
+
+  unhighlight = () => this.sprite.setTint?.(0x999999)
+
+  hoverHighlight = () => this.sprite.setTint?.(0xcccccc)
+
   drawGlow = (size, value) => {
     const glow = createGlow(value ? 0 : 1, value ? 1 : 0, 0, size * 2)
     const glowKey = this.scene.drawCanvas(glow, size * 2)

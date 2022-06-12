@@ -14,13 +14,16 @@ export default class extends Phaser.Scene {
   init() {}
 
   create() {
+    this.mode = 0
     this.nodes = LEVEL.filter((o) => !o.key.match(/^Wire/)).map(
       (o) => new SPRITES[o.key.split('-')[0]](this, o.x, o.y),
     )
 
     this.input.on('drag', (_, object, x, y) => {
-      object.setPosition(x, y)
-      object.children?.forEach((c) => c.setPosition(x, y))
+      if (this.mode === 1) {
+        object.setPosition(x, y)
+        object.children?.forEach((c) => c.setPosition(x, y))
+      }
     })
 
     this.wireService = new WireService(this)
@@ -71,6 +74,9 @@ export default class extends Phaser.Scene {
           this.wireService.connect(...children)
           children.forEach((c) => c.toggleSelect(false))
         }
+      }
+      if (e.key === '4') {
+        this.mode = this.mode ? 0 : 1
       }
     })
   }
