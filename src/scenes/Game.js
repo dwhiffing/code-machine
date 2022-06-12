@@ -50,7 +50,7 @@ export default class extends Phaser.Scene {
       if (e.key === 'Backspace') {
         this.getChildren()
           .filter((w) => w.selected)
-          .forEach((s) => this.removeNode(s.key))
+          .forEach((s) => this.removeNode(s))
       }
       if (e.key === '3') {
         const exported = this.getChildren().map((c) => {
@@ -84,10 +84,11 @@ export default class extends Phaser.Scene {
 
   getChildren = () => [...this.nodes, ...this.wireService.wires]
 
-  removeNode = (key) => {
+  removeNode = (node) => {
+    const key = node.key
     const nodes = this.nodes.filter((w) => w.key.match(new RegExp(key)))
     this.nodes = this.nodes.filter((w) => !nodes.some((c) => c.key === w.key))
-    this.wireService.removeWires(key)
+    this.wireService.disconnect(node)
     nodes.forEach((w) => w.destroy())
   }
 

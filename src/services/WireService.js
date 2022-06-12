@@ -1,4 +1,6 @@
 import { Wire } from '../sprites/Wire'
+import { allSimplePaths } from 'graphology-simple-path'
+import Graph from 'graphology'
 
 export default class WireService {
   constructor(scene) {
@@ -16,67 +18,51 @@ export default class WireService {
     this.checkPower()
   }
 
-  checkPower = () => {
-    // TODO: not dealing with forks properly
-    this.graph = new Map()
-    this.scene.nodes.forEach((e) => {
-      this.graph.set(e.key, [])
-    })
-    this.wires.forEach((e) => {
-      this.graph.get(e.input.key)?.push(e.output.key)
-      this.graph.get(e.output.key)?.push(e.input.key)
-    })
-    const entities = this.scene.getChildren()
-    entities.forEach((e) => {
-      if (!e?.key.match(/^Switch/)) e.value = 0
-    })
-    const start = entities.find((e) => e.key.match(/NegativeCell/))
-    const end = entities.find((e) => e.key.match(/PositiveCell/))
-    const _path = dfs(this.graph, start.key, end.key)
-    const path = _path?.map((k) => entities.find((e) => e.key === k)) || []
-    const broken = path.some(
-      (node) => node?.key.match(/^Switch/) && !node.value,
-    )
-    path.forEach((node, i) => {
-      if (node && !node?.key.match(/Switch|Cell/)) {
-        node.value = broken ? 0 : 1
-      }
-      if (i > 0 && node && path[i - 1]) {
-        const input = path[i - 1].key
-        const output = node.key
-        const key = `Wire-${input}:${output}`
-        const key2 = `Wire-${output}:${input}`
-        const wire = entities.find((e) => e.key === key || e.key === key2)
-        wire.value = broken ? 0 : 1
-      }
-    })
-  }
-
-  removeWires = (key) => {
+  disconnect = (node) => {
+    const key = node.key
     const wires = this.wires.filter((w) => w.key.match(new RegExp(key)))
     this.wires = this.wires.filter((w) => !wires.some((c) => c.key === w.key))
     wires.forEach((w) => w.destroy())
     this.checkPower()
   }
-}
 
-const dfs = (
-  graph,
-  start = 'cell-1',
-  target = 'cell-2',
-  visited = new Set(),
-) => {
-  visited.add(start)
+  checkPower = () => {
+    // reset power state of everything but switches
+    // TODO: should have a generic property for that (maybe interactable?)
+    const entities = this.scene.getChildren()
+    entities.forEach((e) => !e?.key.match(/^Switch/) && (e.value = 0))
 
-  const destinations = graph.get(start)
-  for (const destination of destinations) {
-    if (destination === target) {
-      visited.add(destination)
-      return [...visited]
-    }
+    // create graph of nodes/wires
+    const graph = new Graph({ type: 'undirected' })
+    this.scene.nodes.forEach((e) => {
+      if (e.key.match(/Switch/) && e.value !== 1) return
+      graph.addNode(e.key)
+    })
+    this.wires.forEach((e) => {
+      if (graph.hasNode(e.input.key) && graph.hasNode(e.output.key)) {
+        graph.addEdge(e.output.key, e.input.key)
+      }
+    })
 
-    if (!visited.has(destination)) {
-      return dfs(graph, destination, target, visited)
-    }
+    const start = entities.find((e) => e.key.match(/NegativeCell/))
+    const end = entities.find((e) => e.key.match(/PositiveCell/))
+    if (!start || !end) return
+
+    // power all paths from negative cell to positive cell
+    allSimplePaths(graph, start.key, end.key).forEach((_path) => {
+      if (!_path) return
+      const path = _path?.map((k) => entities.find((e) => e.key === k)) || []
+      path.forEach((node, i) => {
+        if (i === 0) return
+        // all nodes/wires on a path are considered powered
+        const a = `Wire-${path[i - 1].key}:${node.key}`
+        const b = `Wire-${node.key}:${path[i - 1].key}`
+        const wire = entities.find((e) => e.key === a || e.key === b)
+        if (wire) wire.value = 1
+        if (!node.key.match(/Switch|Cell/)) {
+          node.value = 1
+        }
+      })
+    })
   }
 }
