@@ -33,6 +33,10 @@ export class Light {
     })
 
     this.bulb.on('pointerup', (e) => {
+      if (this.placing) {
+        this.placing = false
+        return
+      }
       const offset = Math.abs(e.downX - e.upX) + Math.abs(e.downY - e.upY)
       if (offset !== 0) return
       this.toggleSelect()
@@ -53,11 +57,18 @@ export class Light {
     return this.bulb.y
   }
 
+  set x(value) {
+    return (this.bulb.x = value)
+  }
+  set y(value) {
+    return (this.bulb.y = value)
+  }
+
   toggleSelect = (_selected) => {
     let status = typeof _selected === 'undefined' ? !this.selected : _selected
     this.selected = status
-    if (this.selected || this.hovered) {
-      this.bulb.setTint(this.selected ? 0xffffff : 0xcccccc)
+    if (this.placing || this.selected || this.hovered) {
+      this.bulb.setTint(this.selected || this.placing ? 0xffffff : 0xcccccc)
     } else {
       this.bulb.setTint(0x999999)
     }

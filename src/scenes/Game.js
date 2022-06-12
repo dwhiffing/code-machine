@@ -30,11 +30,23 @@ export default class extends Phaser.Scene {
         this.getChildren().forEach((w) => w.toggleSelect(false))
     })
 
+    this.input.on('pointermove', (p) => {
+      const nodes = this.getChildren().filter((p) => p.placing)
+      nodes.forEach((n) => n.bulb.setPosition(p.x, p.y))
+    })
+
     this.input.keyboard.on('keyup', (e) => {
       if (e.key === 'Backspace') {
         this.getChildren()
           .filter((w) => w.selected)
           .forEach((s) => s.destroy())
+      }
+      if (e.key === '1') {
+        const light = new Light(this, 1200, 800)
+        const pointer = this.input.activePointer
+        light.placing = true
+        light.bulb.setPosition(pointer)
+        this.nodes.push(light)
       }
     })
   }
