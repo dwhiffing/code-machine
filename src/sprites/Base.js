@@ -79,7 +79,6 @@ export class Base {
     (this.sprite.fillColor = this.value ? 0x666600 : 0x666666)
 
   destroy() {
-    this.scene.wireService.removeWires(this.key)
     this.sprite.destroy()
   }
 }
