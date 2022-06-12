@@ -48,6 +48,13 @@ export default class extends Phaser.Scene {
         light.bulb.setPosition(pointer)
         this.nodes.push(light)
       }
+      if (e.key === '2') {
+        const children = this.getChildren().filter((w) => w.selected)
+        if (children.length === 2) {
+          this.wireService.connect(...children)
+          children.forEach((c) => c.toggleSelect(false))
+        }
+      }
     })
   }
 
