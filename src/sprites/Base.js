@@ -9,6 +9,7 @@ export class Base {
     sprite.on('pointerout', () => this.onHover(false))
     sprite.on('pointerover', () => this.onHover(true))
     sprite.on('pointerup', this.onPress)
+    this.text = scene.add.text(sprite.x, sprite.y, this.key)
     this.onHover(false)
   }
 
@@ -80,5 +81,6 @@ export class Base {
 
   destroy() {
     this.sprite.destroy()
+    this.text.destroy()
   }
 }

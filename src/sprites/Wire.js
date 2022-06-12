@@ -20,6 +20,7 @@ export class Wire extends Base {
     const { x, y } = getMidPoint(this.input, this.output)
     const distance = Distance.BetweenPoints(this.input, this.output)
     this.sprite.setPosition(x, y)
+    this.text.setPosition(x, y)
 
     this.sprite.displayHeight = distance
 
