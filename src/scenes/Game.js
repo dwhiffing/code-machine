@@ -1,5 +1,6 @@
 import WireService from '../services/WireService'
 import { Light } from '../sprites/Light'
+import { Node } from '../sprites/Node'
 
 export default class extends Phaser.Scene {
   constructor() {
@@ -10,14 +11,14 @@ export default class extends Phaser.Scene {
 
   create() {
     this.nodes = []
-    const light = new Light(this, 200, 200)
-    const light2 = new Light(this, 500, 500)
-    const light3 = new Light(this, 700, 500)
-    const light4 = new Light(this, 800, 800)
-    this.nodes.push(light)
-    this.nodes.push(light2)
-    this.nodes.push(light3)
-    this.nodes.push(light4)
+    const node = new Node(this, 200, 200)
+    const node2 = new Node(this, 500, 500)
+    const node3 = new Node(this, 700, 500)
+    const node4 = new Light(this, 800, 800)
+    this.nodes.push(node)
+    this.nodes.push(node2)
+    this.nodes.push(node3)
+    this.nodes.push(node4)
 
     this.input.on('drag', (_, object, x, y) => {
       object.setPosition(x, y)
@@ -25,10 +26,10 @@ export default class extends Phaser.Scene {
     })
 
     this.wireService = new WireService(this)
-    this.wireService.connect(light, light2)
-    this.wireService.connect(light3, light4)
-    this.wireService.connect(light, light3)
-    this.wireService.connect(light4, light)
+    this.wireService.connect(node, node2)
+    this.wireService.connect(node3, node4)
+    this.wireService.connect(node, node3)
+    this.wireService.connect(node4, node)
 
     this.input.on('pointerdown', (p, objects) => {
       if (objects.length === 0)
@@ -47,11 +48,11 @@ export default class extends Phaser.Scene {
           .forEach((s) => s.destroy())
       }
       if (e.key === '1') {
-        const light = new Light(this, 1200, 800)
+        const node = new Light(this, 1200, 800)
         const pointer = this.input.activePointer
-        light.placing = true
-        light.bulb.setPosition(pointer)
-        this.nodes.push(light)
+        node.placing = true
+        node.bulb.setPosition(pointer)
+        this.nodes.push(node)
       }
       if (e.key === '2') {
         const children = this.getChildren().filter((w) => w.selected)
