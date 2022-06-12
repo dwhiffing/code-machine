@@ -1,14 +1,11 @@
 export class Base {
-  constructor(scene, sprite, size = 100) {
+  constructor(scene, sprite) {
     this.scene = scene
     this.selected = false
     this.sprite = sprite
     sprite.on('pointerout', () => this.onHover(false))
     sprite.on('pointerover', () => this.onHover(true))
     sprite.on('pointerup', this.onPress)
-    const shape = new Phaser.Geom.Circle(size * 1.5, size * 1.5, size / 2)
-    sprite.setInteractive(shape, Phaser.Geom.Circle.Contains)
-    scene.input.setDraggable(sprite)
     this.onHover(false)
   }
 
@@ -56,15 +53,16 @@ export class Base {
     if (!this.selected && this.hovered) this.hoverHighlight()
   }
 
-  highlight = () => this.sprite.setTint(0xffffff)
+  highlight = () => this.sprite.setTint?.(0xffffff)
 
-  unhighlight = () => this.sprite.setTint(0x999999)
+  unhighlight = () => this.sprite.setTint?.(0x999999)
 
-  hoverHighlight = () => this.sprite.setTint(0xcccccc)
+  hoverHighlight = () => this.sprite.setTint?.(0xcccccc)
 
   destroy() {
     this.scene.wireService.wires
       .filter((w) => w.input === this || w.output === this)
       .forEach((w) => w.destroy())
+    this.sprite.destroy()
   }
 }

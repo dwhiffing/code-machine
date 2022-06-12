@@ -5,8 +5,10 @@ export class Light extends Base {
   constructor(scene, x = 0, y = 0, size = 100) {
     const bulbKey = scene.drawCanvas(createBulb(size), size)
     const sprite = scene.add.image(x, y, bulbKey)
-
-    super(scene, sprite, size)
+    const shape = new Phaser.Geom.Circle(size * 1.5, size * 1.5, size / 2)
+    sprite.setInteractive(shape, Phaser.Geom.Circle.Contains)
+    scene.input.setDraggable(sprite)
+    super(scene, sprite)
 
     this.drawGlow(size)
   }
@@ -16,7 +18,7 @@ export class Light extends Base {
     const glowKey = this.scene.drawCanvas(glow, size * 3)
     this.glow = this.scene.add
       .image(this.sprite.x, this.sprite.y, glowKey)
-      .setAlpha(1)
+      .setAlpha(0)
     this.sprite.children = [this.glow]
   }
 
@@ -24,7 +26,6 @@ export class Light extends Base {
 
   destroy() {
     super.destroy()
-    this.sprite.destroy()
     this.glow.destroy()
   }
 }
