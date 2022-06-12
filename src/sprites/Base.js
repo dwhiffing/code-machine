@@ -5,10 +5,21 @@ export class Base {
     this.scene = scene
     this.selected = false
     this.sprite = sprite
+    this._value = 0
     sprite.on('pointerout', () => this.onHover(false))
     sprite.on('pointerover', () => this.onHover(true))
     sprite.on('pointerup', this.onPress)
     this.onHover(false)
+  }
+
+  get value() {
+    return this._value
+  }
+  set value(v) {
+    if (v !== this.value) {
+      this._value = v
+      this.unhighlight()
+    }
   }
 
   get x() {
@@ -62,9 +73,7 @@ export class Base {
   hoverHighlight = () => this.sprite.setTint?.(0xcccccc)
 
   destroy() {
-    this.scene.wireService.wires
-      .filter((w) => w.input === this || w.output === this)
-      .forEach((w) => w.destroy())
+    this.scene.wireService.removeWires(this.key)
     this.sprite.destroy()
   }
 }

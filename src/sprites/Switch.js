@@ -6,6 +6,7 @@ export class Switch extends Base {
     sprite.setInteractive()
     scene.input.setDraggable(sprite)
     super(scene, sprite, 'Switch')
+    this.value = 1
   }
 
   highlight = () => (this.sprite.fillColor = 0xaaaaaa)

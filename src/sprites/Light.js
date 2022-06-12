@@ -13,6 +13,14 @@ export class Light extends Base {
 
     this.drawGlow(size)
   }
+  get value() {
+    return super.value
+  }
+
+  set value(v) {
+    if (this._value !== v) this.toggle()
+    this._value = v
+  }
 
   drawGlow = (size) => {
     const glow = createGlow(1, 1, 0, size * 3)

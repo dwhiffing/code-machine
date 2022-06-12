@@ -8,9 +8,10 @@ export class Node extends Base {
     super(scene, sprite, 'Node')
   }
 
-  highlight = () => (this.sprite.fillColor = 0xaaaaaa)
+  highlight = () => (this.sprite.fillColor = this.value ? 0xaaaa00 : 0xaaaaaa)
 
-  unhighlight = () => (this.sprite.fillColor = 0x333333)
+  unhighlight = () => (this.sprite.fillColor = this.value ? 0x333300 : 0x333333)
 
-  hoverHighlight = () => (this.sprite.fillColor = 0x666666)
+  hoverHighlight = () =>
+    (this.sprite.fillColor = this.value ? 0x666600 : 0x666666)
 }

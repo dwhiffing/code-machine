@@ -9,17 +9,19 @@ export class Wire extends Base {
     const sprite = scene.add.rectangle(0, 0, 10, dist, 0x333333)
     sprite.setInteractive()
     super(scene, sprite, 'Wire')
+    this.key = `Wire-${input.key}:${output.key}`
     this.scene = scene
     this.input = input
     this.output = output
     this.sprite.setDepth(-1)
   }
 
-  highlight = () => (this.sprite.fillColor = 0xaaaaaa)
+  highlight = () => (this.sprite.fillColor = this.value ? 0xaaaa00 : 0xaaaaaa)
 
-  unhighlight = () => (this.sprite.fillColor = 0x333333)
+  unhighlight = () => (this.sprite.fillColor = this.value ? 0x333300 : 0x333333)
 
-  hoverHighlight = () => (this.sprite.fillColor = 0x666666)
+  hoverHighlight = () =>
+    (this.sprite.fillColor = this.value ? 0x666600 : 0x666666)
 
   update() {
     const { x, y } = getMidPoint(this.input, this.output)
