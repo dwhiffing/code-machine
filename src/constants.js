@@ -7,6 +7,9 @@ export const LEVEL = [
   { key: 'Node-5', x: 1500, y: 800 },
   { key: 'Node-6', x: 1500, y: 200 },
   { key: 'Node-7', x: 400, y: 200 },
+  { key: 'Magnet-8', x: 952, y: 437 },
+  { key: 'Node-9', x: 1118, y: 545 },
+  { key: 'Node-10', x: 1120, y: 434 },
   {
     key: 'Wire-NegativeCell-3:Node-4',
     input: 'NegativeCell-3',
@@ -22,4 +25,17 @@ export const LEVEL = [
     input: 'PositiveCell-2',
     output: 'Node-7',
   },
+  {
+    key: 'Wire-NegativeCell-3:Node-9',
+    input: 'NegativeCell-3',
+    output: 'Node-9',
+  },
+  { key: 'Wire-Node-9:Node-10', input: 'Node-9', output: 'Node-10' },
+  { key: 'Wire-Magnet-8:Node-10', input: 'Magnet-8', output: 'Node-10' },
+  {
+    key: 'Wire-PositiveCell-2:Magnet-8',
+    input: 'PositiveCell-2',
+    output: 'Magnet-8',
+  },
+  { key: 'Wire-Switch-1:Magnet-8', input: 'Switch-1', output: 'Magnet-8' },
 ]

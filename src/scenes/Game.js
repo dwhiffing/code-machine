@@ -2,9 +2,10 @@ import { LEVEL } from '../constants'
 import WireService from '../services/WireService'
 import { NegativeCell, PositiveCell } from '../sprites/Cell'
 import { Light } from '../sprites/Light'
+import { Magnet } from '../sprites/Magnet'
 import { Node } from '../sprites/Node'
 import { Switch } from '../sprites/Switch'
-const SPRITES = { NegativeCell, PositiveCell, Light, Node, Switch }
+const SPRITES = { Magnet, NegativeCell, PositiveCell, Light, Node, Switch }
 
 export default class extends Phaser.Scene {
   constructor() {
