@@ -14,9 +14,13 @@ export class Base {
     sprite.on('pointerup', this.onPress)
 
     this.text = scene.add
-      .text(sprite.x, sprite.y, this.key, { align: 'center' })
-      .setOrigin(0.5, 1)
+      .text(sprite.x, sprite.y, this.key.replace(/Positive|Negative/, ''), {
+        align: 'center',
+      })
+      .setOrigin(0.5)
       .setAlpha(scene.mode)
+
+    this.text.setDepth(2)
 
     sprite.children = [this.text]
 
@@ -29,8 +33,7 @@ export class Base {
   set value(v) {
     if (v !== this._value) {
       this._value = v
-      this.unhighlight()
-      if (this.hovered) this.hoverHighlight()
+      this.updateHighlight()
     }
   }
 
@@ -75,20 +78,27 @@ export class Base {
   toggleSelect = (_selected) => {
     let status = typeof _selected === 'undefined' ? !this.selected : _selected
     this.selected = status
+    this.updateHighlight()
+  }
+
+  updateHighlight = () => {
+    this.text.setStroke('#000000', 4)
     if (this.selected || this.placing) {
       this.highlight()
     } else {
       this.unhighlight()
     }
-    if (!this.selected && this.hovered) this.hoverHighlight()
+    if (!this.selected && this.hovered) {
+      this.hoverHighlight()
+    }
   }
 
-  highlight = () => (this.sprite.fillColor = this.value ? 0xaaaa00 : 0xaaaaaa)
+  highlight = () => (this.sprite.fillColor = this.value ? 0xaaaa00 : 0x555555)
 
   unhighlight = () => (this.sprite.fillColor = this.value ? 0x555500 : 0x333333)
 
   hoverHighlight = () =>
-    (this.sprite.fillColor = this.value ? 0x999900 : 0x666666)
+    (this.sprite.fillColor = this.value ? 0x999900 : 0x444444)
 
   destroy() {
     this.sprite.destroy()

@@ -1,7 +1,7 @@
 import { createGlow, createBulb, drawCanvas } from '../services/led'
 import { Base } from './Base'
 
-const size = 50
+const size = 70
 export class Cell extends Base {
   constructor(scene, x = 0, y = 0, type) {
     const bulbKey = drawCanvas(scene, createBulb(size), size)
@@ -12,11 +12,20 @@ export class Cell extends Base {
     super(scene, sprite, type)
   }
 
-  highlight = () => this.sprite.setTint?.(0xffffff)
+  highlight = () => {
+    this.sprite.setTint?.(0xffffff)
+    this.glow.setScale(1.3)
+  }
 
-  unhighlight = () => this.sprite.setTint?.(0x999999)
+  unhighlight = () => {
+    this.sprite.setTint?.(0x999999)
+    this.glow.setScale(1)
+  }
 
-  hoverHighlight = () => this.sprite.setTint?.(0xcccccc)
+  hoverHighlight = () => {
+    this.sprite.setTint?.(0xcccccc)
+    this.glow.setScale(1.15)
+  }
 
   drawGlow = (size, value) => {
     const glow = createGlow(value ? 0 : 1, value ? 1 : 0, 0, size * 2)
