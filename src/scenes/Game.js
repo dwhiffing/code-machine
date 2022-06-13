@@ -25,23 +25,36 @@ export default class extends Phaser.Scene {
 
     this.input.on('drag', (_, object, x, y) => {
       if (this.mode !== 1) return
-
+      this.isDragging = true
       object.setPosition(x, y)
       object.children?.forEach((c) => c.setPosition(x, y))
     })
 
+    this.input.on('wheel', this.onWheel)
+
     this.input.on('pointerdown', (p, objects) => {
-      if (objects.length === 0)
+      const camera = this.cameras.main
+      this.dragStart = { x: camera.scrollX, y: camera.scrollY }
+      if (objects.length === 0) {
         this.getChildren().forEach((w) => w.toggleSelect(false))
+      }
+    })
+
+    this.input.on('pointerup', () => {
+      this.isDragging = false
     })
 
     this.input.on('pointermove', (p) => {
+      if (!this.isDragging && p.isDown) {
+        this.onDragCamera(p)
+      }
+
       const nodes = this.getChildren().filter((p) => p.placing)
       nodes.forEach((n) => n.sprite.setPosition(p.x, p.y))
     })
 
     this.input.keyboard.on('keyup', (e) => {
-      if (e.key === '`') this.toggleEditMode()
+      if (e.key === ' ') this.toggleEditMode()
       if (e.key === 'p') this.exportLevelToClipboard()
 
       if (this.mode !== 1) return
@@ -129,6 +142,21 @@ export default class extends Phaser.Scene {
     canvas.context.drawImage(image, size, size)
     canvas.refresh()
     return key
+  }
+
+  onWheel = (p, o, x, y) => {
+    const camera = this.cameras.main
+    camera.zoom -= y * 0.001
+    if (camera.zoom < 0.2) camera.zoom = 0.2
+    if (camera.zoom > 2) camera.zoom = 2
+  }
+  onDragCamera = (p) => {
+    const camera = this.cameras.main
+    const scale = 1 / camera.zoom
+    const diffX = (p.position.x - p.downX) * scale
+    const diffY = (p.position.y - p.downY) * scale
+    camera.scrollX = this.dragStart.x - diffX
+    camera.scrollY = this.dragStart.y - diffY
   }
 
   getChildren = () => [...this.nodes, ...this.wireService.wires]
