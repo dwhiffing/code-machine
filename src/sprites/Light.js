@@ -35,7 +35,7 @@ export class Light extends Base {
     this.glow = this.scene.add
       .image(this.sprite.x, this.sprite.y, glowKey)
       .setAlpha(0)
-    this.sprite.children = [this.glow]
+    this.sprite.children = [this.glow, this.text]
   }
 
   toggle = () => this.glow.setAlpha(this.glow.alpha ? 0 : 1)

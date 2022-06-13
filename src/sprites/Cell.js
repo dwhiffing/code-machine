@@ -22,7 +22,7 @@ export class Cell extends Base {
     const glow = createGlow(value ? 0 : 1, value ? 1 : 0, 0, size * 2)
     const glowKey = this.scene.drawCanvas(glow, size * 2)
     this.glow = this.scene.add.image(this.sprite.x, this.sprite.y, glowKey)
-    this.sprite.children = [this.glow]
+    this.sprite.children = [this.glow, this.text]
   }
 
   toggle = () => this.glow.setAlpha(this.glow.alpha ? 0 : 1)
