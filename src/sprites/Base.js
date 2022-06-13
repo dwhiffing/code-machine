@@ -74,10 +74,10 @@ export class Base {
 
   highlight = () => (this.sprite.fillColor = this.value ? 0xaaaa00 : 0xaaaaaa)
 
-  unhighlight = () => (this.sprite.fillColor = this.value ? 0x333300 : 0x333333)
+  unhighlight = () => (this.sprite.fillColor = this.value ? 0x555500 : 0x333333)
 
   hoverHighlight = () =>
-    (this.sprite.fillColor = this.value ? 0x666600 : 0x666666)
+    (this.sprite.fillColor = this.value ? 0x999900 : 0x666666)
 
   destroy() {
     this.sprite.destroy()
