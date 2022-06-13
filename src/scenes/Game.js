@@ -15,26 +15,20 @@ export default class extends Phaser.Scene {
   init() {}
 
   create() {
-    this.mode = 0
-    this.nodes = LEVEL.filter((o) => !o.key.match(/^Wire/)).map(
-      (o) => new SPRITES[o.key.split('-')[0]](this, o.x, o.y),
-    )
+    this.loadLevel(LEVEL)
 
-    this.input.on('drag', (_, object, x, y) => {
-      if (this.mode === 1) {
-        object.setPosition(x, y)
-        object.children?.forEach((c) => c.setPosition(x, y))
-      }
+    this.time.addEvent({
+      delay: 250,
+      repeat: -1,
+      callback: this.wireService.checkPower,
     })
 
-    this.wireService = new WireService(this)
+    this.input.on('drag', (_, object, x, y) => {
+      if (this.mode !== 1) return
 
-    LEVEL.filter((o) => o.key.match(/^Wire/)).forEach((o) =>
-      this.wireService.connect(
-        this.nodes.find((n) => n.key === o.input),
-        this.nodes.find((n) => n.key === o.output),
-      ),
-    )
+      object.setPosition(x, y)
+      object.children?.forEach((c) => c.setPosition(x, y))
+    })
 
     this.input.on('pointerdown', (p, objects) => {
       if (objects.length === 0)
@@ -47,42 +41,79 @@ export default class extends Phaser.Scene {
     })
 
     this.input.keyboard.on('keyup', (e) => {
-      if (e.key === 'Backspace') {
-        this.getChildren()
-          .filter((w) => w.selected)
-          .forEach((s) => this.removeNode(s))
-      }
-      if (e.key === '3') {
-        const exported = this.getChildren().map((c) => {
-          let e = { key: c.key }
-          if (e.key.match(/^Wire/)) {
-            return { ...e, input: c.input.key, output: c.output.key }
-          } else {
-            return { ...e, x: Math.round(c.x), y: Math.round(c.y) }
-          }
-        })
-        navigator.clipboard.writeText(JSON.stringify(exported))
-      }
-      if (e.key === '1') {
-        const node = new Node(this, 1200, 800)
-        node.placing = true
-        node.sprite.setPosition(this.input.activePointer)
-        this.nodes.push(node)
-      }
-      if (e.key === '2') {
-        const children = this.getChildren().filter((w) => w.selected)
-        if (children.length === 2) {
-          this.wireService.connect(...children)
-          children.forEach((c) => c.toggleSelect(false))
-        }
-      }
-      if (e.key === '4') {
-        this.mode = this.mode ? 0 : 1
-      }
+      if (e.key === '`') this.toggleEditMode()
+      if (e.key === 'p') this.exportLevelToClipboard()
+
+      if (this.mode !== 1) return
+
+      if (e.key === 'c') this.connectSelectedNodes()
+      if (e.key === '1') this.placeNode()
+      if (e.key === 'x') this.deleteSelectedNodes()
     })
   }
 
-  getChildren = () => [...this.nodes, ...this.wireService.wires]
+  update() {
+    this.wireService.update()
+  }
+
+  loadLevel = (level) => {
+    this.mode = 0
+    this.nodes = level
+      .filter((o) => !o.key.match(/^Wire/))
+      .map((o) => new SPRITES[o.key.split('-')[0]](this, o.x, o.y))
+
+    this.wireService = new WireService(this)
+
+    level
+      .filter((o) => o.key.match(/^Wire/))
+      .forEach((o) =>
+        this.wireService.connect(
+          this.nodes.find((n) => n.key === o.input),
+          this.nodes.find((n) => n.key === o.output),
+        ),
+      )
+  }
+
+  toggleEditMode = () => {
+    this.mode = this.mode ? 0 : 1
+    this.getChildren().forEach((c) => c.text.setAlpha(this.mode))
+  }
+
+  placeNode = () => {
+    const node = new Node(this, 1200, 800)
+    node.placing = true
+    node.sprite.setPosition(this.input.activePointer)
+    this.nodes.push(node)
+  }
+
+  connectSelectedNodes = () => {
+    const children = this.getChildren().filter(
+      (w) => w.selected && !w.key.match(/^Wire/),
+    )
+    if (children.length === 2) {
+      this.wireService.connect(...children)
+      children.forEach((c) => c.toggleSelect(false))
+    }
+  }
+
+  deleteSelectedNodes = () => {
+    this.getChildren()
+      .filter((w) => w.selected)
+      .forEach((s) => this.removeNode(s))
+  }
+
+  exportLevelToClipboard = () => {
+    const exported = this.getChildren().map((c) => {
+      let e = { key: c.key }
+      if (e.key.match(/^Wire/)) {
+        return { ...e, input: c.input.key, output: c.output.key }
+      } else {
+        return { ...e, x: Math.round(c.x), y: Math.round(c.y) }
+      }
+    })
+    navigator.clipboard.writeText(JSON.stringify(exported))
+    console.log('copied level')
+  }
 
   removeNode = (node) => {
     const key = node.key
@@ -92,10 +123,6 @@ export default class extends Phaser.Scene {
     nodes.forEach((w) => w.destroy())
   }
 
-  update() {
-    this.wireService.update()
-  }
-
   drawCanvas(image, size) {
     const key = 'key' + Date.now()
     const canvas = this.textures.createCanvas(key, size * 3, size * 3)
@@ -103,4 +130,6 @@ export default class extends Phaser.Scene {
     canvas.refresh()
     return key
   }
+
+  getChildren = () => [...this.nodes, ...this.wireService.wires]
 }

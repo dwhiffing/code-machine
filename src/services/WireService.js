@@ -15,22 +15,30 @@ export default class WireService {
   connect = (nodeA, nodeB) => {
     const wire = new Wire(this.scene, nodeA, nodeB)
     this.wires.push(wire)
-    this.checkPower()
   }
 
   disconnect = (node) => {
-    const key = node.key
-    const wires = this.wires.filter((w) => w.key.match(new RegExp(key)))
-    this.wires = this.wires.filter((w) => !wires.some((c) => c.key === w.key))
+    let wires
+    if (node.key.match(/^Wire/)) {
+      wires = [this.wires.find((w) => w.key.match(new RegExp(node.key)))]
+    } else {
+      wires = this.wires.filter((w) => w.key.match(new RegExp(node.key)))
+    }
     wires.forEach((w) => w.destroy())
-    this.checkPower()
+    this.wires = this.wires.filter((w) => !wires.some((c) => c.key === w.key))
   }
 
   checkPower = () => {
     // reset power state of everything but switches
     // TODO: should have a generic property for that (maybe interactable?)
     const entities = this.scene.getChildren()
-    entities.forEach((e) => !e?.key.match(/^Switch/) && (e.value = 0))
+
+    entities.forEach((e) => {
+      e.disabled = false
+      if (!e?.key.match(/^Switch/)) {
+        e.value = 0
+      }
+    })
 
     // create graph of nodes/wires
     const graph = new Graph({ type: 'undirected' })
@@ -39,11 +47,17 @@ export default class WireService {
       graph.addNode(e.key)
     })
     this.wires.forEach((e) => {
+      // if input and output are switch/magnet, dont connect in graph
+      if (
+        e.input.key.match(/Switch|Magnet/) &&
+        e.output.key.match(/Switch|Magnet/)
+      ) {
+        return
+      }
       if (graph.hasNode(e.input.key) && graph.hasNode(e.output.key)) {
         graph.addEdge(e.output.key, e.input.key)
       }
     })
-
     const start = entities.find((e) => e.key.match(/NegativeCell/))
     const end = entities.find((e) => e.key.match(/PositiveCell/))
     if (!start || !end) return
@@ -63,6 +77,23 @@ export default class WireService {
           node.value = 1
         }
       })
+    })
+
+    entities.forEach((e) => {
+      if (e?.key.match(/^Magnet/)) {
+        // find connected switches and set their value to magnet value
+        const wires = entities.filter((c) =>
+          c.key.match(new RegExp(`Wire.+(Switch|${e.key}).+(Switch|${e.key})`)),
+        )
+        const switchKey = wires[0]?.key.match(/(Switch-\d+)/)[0]
+        const _switch = switchKey
+          ? entities.find((e) => e.key === switchKey)
+          : null
+        if (_switch) {
+          _switch.disabled = true
+          _switch.value = e.value
+        }
+      }
     })
   }
 }

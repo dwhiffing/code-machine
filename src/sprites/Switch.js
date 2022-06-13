@@ -6,11 +6,10 @@ export class Switch extends Base {
     sprite.setInteractive()
     scene.input.setDraggable(sprite)
     super(scene, sprite, 'Switch')
-    this.value = 1
   }
 
   interact = () => {
+    if (this.disabled) return
     this.value = this.value ? 0 : 1
-    this.scene.wireService.checkPower()
   }
 }

@@ -4,12 +4,22 @@ export class Base {
     this.key = `${type}-${id++}`
     this.scene = scene
     this.selected = false
+    this.disabled = false
+    this.hovered = false
     this.sprite = sprite
     this._value = 0
+
     sprite.on('pointerout', () => this.onHover(false))
     sprite.on('pointerover', () => this.onHover(true))
     sprite.on('pointerup', this.onPress)
-    this.text = scene.add.text(sprite.x, sprite.y, this.key)
+
+    this.text = scene.add
+      .text(sprite.x, sprite.y, this.key, { align: 'center' })
+      .setOrigin(0.5, 1)
+      .setAlpha(scene.mode)
+
+    sprite.children = [this.text]
+
     this.onHover(false)
   }
 
@@ -17,9 +27,10 @@ export class Base {
     return this._value
   }
   set value(v) {
-    if (v !== this.value) {
+    if (v !== this._value) {
       this._value = v
       this.unhighlight()
+      if (this.hovered) this.hoverHighlight()
     }
   }
 
