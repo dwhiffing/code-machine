@@ -7,7 +7,7 @@ export class Base {
     this.disabled = false
     this.hovered = false
     this.sprite = sprite
-    this._value = 0
+    sprite._parent = this._value = 0
 
     sprite.on('pointerout', () => this.onHover(false))
     sprite.on('pointerover', () => this.onHover(true))
@@ -52,11 +52,6 @@ export class Base {
   }
 
   onPress = (e) => {
-    if (this.placing) {
-      this.placing = false
-      return
-    }
-
     const offset = Math.abs(e.downX - e.upX) + Math.abs(e.downY - e.upY)
     if (offset !== 0) return
 
@@ -78,6 +73,7 @@ export class Base {
   toggleSelect = (_selected) => {
     let status = typeof _selected === 'undefined' ? !this.selected : _selected
     this.selected = status
+    this.placing = false
     this.updateHighlight()
   }
 

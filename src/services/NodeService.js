@@ -26,6 +26,34 @@ export default class NodeService {
       )
   }
 
+  cloneSelectedNodes = () => {
+    this.cloneStart = {
+      x: this.scene.input.activePointer.x,
+      y: this.scene.input.activePointer.y,
+    }
+    const nodes = this.scene.getSelectedNodes()
+    const wires = this.scene
+      .getEntities()
+      .filter((e) => e.selected && e.key.match(/Wire/))
+      .map((e) => [e.input.key, e.output.key])
+
+    const map = {}
+    this.scene.deselect()
+    nodes.forEach((n) => {
+      const node = new SPRITES[n.key.split('-')[0]](this.scene, n.x, n.y)
+      node.placing = true
+      this.nodes.push(node)
+      map[n.key] = node.key
+    })
+
+    wires.forEach(([inKey, outKey]) => {
+      const nodeA = this.nodes.find((n) => n.key === map[inKey])
+      const nodeB = this.nodes.find((n) => n.key === map[outKey])
+      this.scene.wireService.connect(nodeA, nodeB)
+    })
+    this.updatePosMap()
+  }
+
   placeNode = () => {
     const node = new Node(this.scene, 1200, 800)
     node.placing = true
@@ -65,7 +93,13 @@ export default class NodeService {
 
   onPointerMove = (p) => {
     const nodes = this.scene.getEntities().filter((p) => p.placing)
-    nodes.forEach((n) => n.sprite.setPosition(p.worldX, p.worldY))
+    if (nodes.length > 0) {
+      this.moveNodes(
+        nodes,
+        p.x - this.cloneStart?.x ?? 0,
+        p.y - this.cloneStart?.y ?? 0,
+      )
+    }
   }
 
   exportLevelToClipboard = () => {
@@ -79,5 +113,22 @@ export default class NodeService {
     })
     navigator.clipboard.writeText(JSON.stringify(exported))
     console.log('copied level')
+  }
+
+  updatePosMap = () => {
+    // store original position of selected objects for dragging
+    this.posMap = this.scene
+      .getEntities()
+      .reduce((obj, e) => ({ ...obj, [e.key]: { x: e.x, y: e.y } }), {})
+  }
+
+  moveNodes = (nodes, diffX, diffY) => {
+    // move all objects based on their position before draggin
+    nodes.forEach((e) => {
+      const posX = this.posMap[e.key]?.x + diffX
+      const posY = this.posMap[e.key]?.y + diffY
+      e.sprite.setPosition(posX, posY)
+      e.sprite.children?.forEach((c) => c.setPosition(posX, posY))
+    })
   }
 }

@@ -39,6 +39,7 @@ export default class extends Phaser.Scene {
     this.clickStart = { x: p.x, y: p.y }
     this.dragStart = { x: this.camera.scrollX, y: this.camera.scrollY }
     this.clickedOnNothing = objects.length === 0
+    this.nodeService.updatePosMap()
   }
 
   onPointerUp = (p, objects) => {
@@ -53,10 +54,9 @@ export default class extends Phaser.Scene {
     this.isDraggingNode = false
     this.clickedOnNothing = false
 
-    // store original position of selected objects for dragging
-    this.selectedMap = this.getEntities()
-      .filter((e) => e.selected)
-      .reduce((obj, e) => ({ ...obj, [e.key]: { x: e.x, y: e.y } }), {})
+    this.getEntities()
+      .filter((e) => e.placing)
+      .forEach((e) => e.toggleSelect(false))
   }
 
   onPointerMove = (p) => {
@@ -69,19 +69,17 @@ export default class extends Phaser.Scene {
     }
   }
 
-  onDragNode = (p) => {
+  onDragNode = (p, object) => {
     if (this.mode !== 1) return
     this.isDraggingNode = true
+    let nodes = this.getSelectedNodes()
+    if (nodes.length === 0) {
+      nodes = this.getEntities().filter((e) => e.key === object._parent.key)
+    }
 
-    // move all objects based on their position before draggin
-    this.getEntities()
-      .filter((e) => e.selected && !e.key.match(/Wire/))
-      .forEach((e) => {
-        const posX = this.selectedMap[e.key].x + p.x - this.clickStart.x
-        const posY = this.selectedMap[e.key].y + p.y - this.clickStart.y
-        e.sprite.setPosition(posX, posY)
-        e.sprite.children?.forEach((c) => c.setPosition(posX, posY))
-      })
+    const diffX = p.x - this.clickStart.x
+    const diffY = p.y - this.clickStart.y
+    this.nodeService.moveNodes(nodes, diffX, diffY)
   }
 
   onWheel = (p, o, x, y) => {
@@ -97,6 +95,7 @@ export default class extends Phaser.Scene {
     if (this.mode === 1) {
       if (e.key === '1') this.nodeService.placeNode()
       if (e.key === 'c') this.nodeService.connectSelectedNodes()
+      if (e.key === 'v') this.nodeService.cloneSelectedNodes()
       if (e.key === 'x') this.nodeService.deleteSelectedNodes()
     }
   }
@@ -104,6 +103,7 @@ export default class extends Phaser.Scene {
   toggleEditMode = () => {
     this.mode = this.mode ? 0 : 1
     this.getEntities().forEach((c) => c.text.setAlpha(this.mode))
+    this.deselect()
   }
 
   onDragCamera = (p) => {
@@ -134,6 +134,9 @@ export default class extends Phaser.Scene {
     const box = new Rectangle(_x, _y, Math.abs(width), Math.abs(height))
     this.getEntities().forEach((e) => e.toggleSelect(box.contains(e.x, e.y)))
   }
+
+  getSelectedNodes = () =>
+    this.getEntities().filter((e) => e.selected && !e.key.match(/Wire/))
 
   getEntities = () => [...this.nodeService.nodes, ...this.wireService.wires]
 }

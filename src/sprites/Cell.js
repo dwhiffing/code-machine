@@ -14,7 +14,7 @@ export class Cell extends Base {
 
   highlight = () => {
     this.sprite.setTint?.(0xffffff)
-    this.glow.setScale(1.3)
+    this.glow.setScale(1.4)
   }
 
   unhighlight = () => {
