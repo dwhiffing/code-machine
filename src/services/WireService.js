@@ -6,6 +6,11 @@ export default class WireService {
   constructor(scene) {
     this.scene = scene
     this.wires = []
+    this.scene.time.addEvent({
+      delay: 250,
+      repeat: -1,
+      callback: this.checkPower,
+    })
   }
 
   update() {
@@ -31,7 +36,7 @@ export default class WireService {
   checkPower = () => {
     // reset power state of everything but switches
     // TODO: should have a generic property for that (maybe interactable?)
-    const entities = this.scene.getChildren()
+    const entities = this.scene.getEntities()
 
     entities.forEach((e) => {
       e.disabled = false
@@ -42,10 +47,13 @@ export default class WireService {
 
     // create graph of nodes/wires
     const graph = new Graph({ type: 'undirected' })
-    this.scene.nodes.forEach((e) => {
-      if (e.key.match(/Switch/) && e.value !== 1) return
-      graph.addNode(e.key)
-    })
+    this.scene
+      .getEntities()
+      .filter((n) => !n.key.match(/Wire/))
+      .forEach((e) => {
+        if (e.key.match(/Switch/) && e.value !== 1) return
+        graph.addNode(e.key)
+      })
     this.wires.forEach((e) => {
       // if input and output are switch/magnet, dont connect in graph
       if (

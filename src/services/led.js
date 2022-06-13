@@ -100,3 +100,11 @@ export const createGlow = (r, g, b, size) =>
     const a = smoothstep(0, 1, d)
     return newCol(result.r, result.g, result.b, a * a * a)
   })
+
+export const drawCanvas = (scene, image, size) => {
+  const key = 'key' + Date.now()
+  const canvas = scene.textures.createCanvas(key, size * 3, size * 3)
+  canvas.context.drawImage(image, size, size)
+  canvas.refresh()
+  return key
+}

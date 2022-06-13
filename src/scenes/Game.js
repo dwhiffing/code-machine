@@ -1,11 +1,6 @@
 import { LEVEL } from '../constants'
 import WireService from '../services/WireService'
-import { NegativeCell, PositiveCell } from '../sprites/Cell'
-import { Light } from '../sprites/Light'
-import { Magnet } from '../sprites/Magnet'
-import { Node } from '../sprites/Node'
-import { Switch } from '../sprites/Switch'
-const SPRITES = { Magnet, NegativeCell, PositiveCell, Light, Node, Switch }
+import NodeService from '../services/NodeService'
 
 export default class extends Phaser.Scene {
   constructor() {
@@ -15,168 +10,104 @@ export default class extends Phaser.Scene {
   init() {}
 
   create() {
-    this.loadLevel(LEVEL)
+    this.mode = 0
+    this.camera = this.cameras.main
+    this.nodeService = new NodeService(this)
+    this.wireService = new WireService(this)
+    this.nodeService.loadLevel(LEVEL)
 
-    this.time.addEvent({
-      delay: 250,
-      repeat: -1,
-      callback: this.wireService.checkPower,
-    })
+    this.selectBox = this.add
+      .rectangle(0, 0, 1, 1)
+      .setOrigin(0, 0)
+      .setFillStyle(0xffffff, 0.1)
 
-    this.input.on('drag', (_, object, x, y) => {
-      if (this.mode !== 1) return
-      this.isDraggingNode = true
-      object.setPosition(x, y)
-      object.children?.forEach((c) => c.setPosition(x, y))
-    })
-
+    const { SHIFT } = Phaser.Input.Keyboard.KeyCodes
+    this.shiftKey = this.input.keyboard.addKey(SHIFT)
+    this.input.on('pointerdown', this.onPointerDown)
+    this.input.on('pointerup', this.onPointerUp)
+    this.input.on('pointermove', this.onPointerMove)
+    this.input.on('drag', this.onDragNode)
     this.input.on('wheel', this.onWheel)
-
-    this.input.on('pointerdown', (p, objects) => {
-      const camera = this.cameras.main
-      this.dragStart = { x: camera.scrollX, y: camera.scrollY }
-      if (objects.length === 0 || !shift.isDown) {
-        this.getChildren().forEach((w) => w.toggleSelect(false))
-      }
-    })
-    const shift = this.input.keyboard.addKey(
-      Phaser.Input.Keyboard.KeyCodes.SHIFT,
-    )
-
-    this.input.on('pointerup', () => {
-      this.isDraggingNode = false
-      if (this.selectBox) {
-        this.selectBox.destroy()
-        this.selectBox = null
-      }
-    })
-
-    this.input.on('pointermove', (p) => {
-      const nodes = this.getChildren().filter((p) => p.placing)
-      nodes.forEach((n) => n.sprite.setPosition(p.x, p.y))
-      if (this.isDraggingNode || !p.isDown) return
-
-      if (!shift.isDown || this.mode === 0) {
-        this.onDragCamera(p)
-        return
-      }
-
-      // TODO: whenever box changes, check which nodes are intersecting and update selected status
-      if (this.selectBox) {
-        this.selectBox.setDisplaySize(p.x - p.downX, p.y - p.downY)
-      } else {
-        this.selectBox = this.add
-          .rectangle(p.worldX, p.worldY, 1, 1)
-          .setOrigin(0, 0)
-          .setFillStyle(0xffffff, 0.1)
-      }
-    })
-
-    this.input.keyboard.on('keyup', (e) => {
-      if (e.key === ' ') this.toggleEditMode()
-      if (e.key === 'p') this.exportLevelToClipboard()
-
-      if (this.mode !== 1) return
-
-      if (e.key === 'c') this.connectSelectedNodes()
-      if (e.key === '1') this.placeNode()
-      if (e.key === 'x') this.deleteSelectedNodes()
-    })
+    this.input.keyboard.on('keyup', this.onKeyUp)
   }
 
   update() {
     this.wireService.update()
   }
 
-  loadLevel = (level) => {
-    this.mode = 0
-    this.nodes = level
-      .filter((o) => !o.key.match(/^Wire/))
-      .map((o) => new SPRITES[o.key.split('-')[0]](this, o.x, o.y))
+  onPointerDown = (p, objects) => {
+    this.dragStart = { x: this.camera.scrollX, y: this.camera.scrollY }
+    if (objects.length === 0 || !this.shiftKey.isDown) {
+      this.deselect()
+    }
+  }
 
-    this.wireService = new WireService(this)
+  onPointerUp = () => {
+    this.isDraggingNode = false
+    this.clearSelectBox()
+  }
 
-    level
-      .filter((o) => o.key.match(/^Wire/))
-      .forEach((o) =>
-        this.wireService.connect(
-          this.nodes.find((n) => n.key === o.input),
-          this.nodes.find((n) => n.key === o.output),
-        ),
-      )
+  onPointerMove = (p) => {
+    if (this.isDraggingNode || !p.isDown) return
+
+    if (this.shiftKey.isDown && this.mode === 1) {
+      this.handleSelectBox(p)
+    } else {
+      this.onDragCamera(p)
+    }
+  }
+
+  onDragNode = (_, object, x, y) => {
+    if (this.mode !== 1) return
+    this.isDraggingNode = true
+    object.setPosition(x, y)
+    object.children?.forEach((c) => c.setPosition(x, y))
+  }
+
+  onWheel = (p, o, x, y) => {
+    this.camera.zoom -= y * 0.001
+    if (this.camera.zoom < 0.2) this.camera.zoom = 0.2
+    if (this.camera.zoom > 2) this.camera.zoom = 2
+  }
+
+  onKeyUp = (e) => {
+    if (e.key === ' ') this.toggleEditMode()
+    if (e.key === 'p') this.nodeService.exportLevelToClipboard()
+
+    if (this.mode === 1) {
+      if (e.key === '1') this.nodeService.placeNode()
+      if (e.key === 'c') this.nodeService.connectSelectedNodes()
+      if (e.key === 'x') this.nodeService.deleteSelectedNodes()
+    }
   }
 
   toggleEditMode = () => {
     this.mode = this.mode ? 0 : 1
-    this.getChildren().forEach((c) => c.text.setAlpha(this.mode))
+    this.getEntities().forEach((c) => c.text.setAlpha(this.mode))
   }
 
-  placeNode = () => {
-    const node = new Node(this, 1200, 800)
-    node.placing = true
-    node.sprite.setPosition(this.input.activePointer)
-    this.nodes.push(node)
-  }
-
-  connectSelectedNodes = () => {
-    const children = this.getChildren().filter(
-      (w) => w.selected && !w.key.match(/^Wire/),
-    )
-    if (children.length === 2) {
-      this.wireService.connect(...children)
-      children.forEach((c) => c.toggleSelect(false))
-    }
-  }
-
-  deleteSelectedNodes = () => {
-    this.getChildren()
-      .filter((w) => w.selected)
-      .forEach((s) => this.removeNode(s))
-  }
-
-  exportLevelToClipboard = () => {
-    const exported = this.getChildren().map((c) => {
-      let e = { key: c.key }
-      if (e.key.match(/^Wire/)) {
-        return { ...e, input: c.input.key, output: c.output.key }
-      } else {
-        return { ...e, x: Math.round(c.x), y: Math.round(c.y) }
-      }
-    })
-    navigator.clipboard.writeText(JSON.stringify(exported))
-    console.log('copied level')
-  }
-
-  removeNode = (node) => {
-    const key = node.key
-    const nodes = this.nodes.filter((w) => w.key.match(new RegExp(key)))
-    this.nodes = this.nodes.filter((w) => !nodes.some((c) => c.key === w.key))
-    if (!node.key.match(/Wire/)) this.wireService.disconnect(node)
-    nodes.forEach((w) => w.destroy())
-  }
-
-  drawCanvas(image, size) {
-    const key = 'key' + Date.now()
-    const canvas = this.textures.createCanvas(key, size * 3, size * 3)
-    canvas.context.drawImage(image, size, size)
-    canvas.refresh()
-    return key
-  }
-
-  onWheel = (p, o, x, y) => {
-    const camera = this.cameras.main
-    camera.zoom -= y * 0.001
-    if (camera.zoom < 0.2) camera.zoom = 0.2
-    if (camera.zoom > 2) camera.zoom = 2
-  }
   onDragCamera = (p) => {
-    const camera = this.cameras.main
-    const scale = 1 / camera.zoom
-    const diffX = (p.position.x - p.downX) * scale
-    const diffY = (p.position.y - p.downY) * scale
-    camera.scrollX = this.dragStart.x - diffX
-    camera.scrollY = this.dragStart.y - diffY
+    const scale = 1 / this.camera.zoom
+    this.camera.scrollX = this.dragStart.x - (p.position.x - p.downX) * scale
+    this.camera.scrollY = this.dragStart.y - (p.position.y - p.downY) * scale
   }
 
-  getChildren = () => [...this.nodes, ...this.wireService.wires]
+  deselect = () => {
+    this.getEntities().forEach((w) => w.toggleSelect(false))
+  }
+
+  clearSelectBox = (p) => {
+    this.selectBox.setPosition(0, 0)
+    this.selectBox.setDisplaySize(0, 0)
+  }
+
+  handleSelectBox = (p) => {
+    if (this.selectBox.x == 0) {
+      this.selectBox.setPosition(p.worldX, p.worldY)
+    }
+    this.selectBox.setDisplaySize(p.x - p.downX, p.y - p.downY)
+    // TODO: whenever box changes, check which nodes are intersecting and update selected status
+  }
+
+  getEntities = () => [...this.nodeService.nodes, ...this.wireService.wires]
 }
