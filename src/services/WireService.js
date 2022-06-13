@@ -24,8 +24,8 @@ export default class WireService {
     } else {
       wires = this.wires.filter((w) => w.key.match(new RegExp(node.key)))
     }
-    wires.forEach((w) => w.destroy())
     this.wires = this.wires.filter((w) => !wires.some((c) => c.key === w.key))
+    wires.forEach((w) => w.destroy())
   }
 
   checkPower = () => {

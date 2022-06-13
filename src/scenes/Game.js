@@ -25,7 +25,7 @@ export default class extends Phaser.Scene {
 
     this.input.on('drag', (_, object, x, y) => {
       if (this.mode !== 1) return
-      this.isDragging = true
+      this.isDraggingNode = true
       object.setPosition(x, y)
       object.children?.forEach((c) => c.setPosition(x, y))
     })
@@ -35,22 +35,41 @@ export default class extends Phaser.Scene {
     this.input.on('pointerdown', (p, objects) => {
       const camera = this.cameras.main
       this.dragStart = { x: camera.scrollX, y: camera.scrollY }
-      if (objects.length === 0) {
+      if (objects.length === 0 || !shift.isDown) {
         this.getChildren().forEach((w) => w.toggleSelect(false))
       }
     })
+    const shift = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.SHIFT,
+    )
 
     this.input.on('pointerup', () => {
-      this.isDragging = false
+      this.isDraggingNode = false
+      if (this.selectBox) {
+        this.selectBox.destroy()
+        this.selectBox = null
+      }
     })
 
     this.input.on('pointermove', (p) => {
-      if (!this.isDragging && p.isDown) {
-        this.onDragCamera(p)
-      }
-
       const nodes = this.getChildren().filter((p) => p.placing)
       nodes.forEach((n) => n.sprite.setPosition(p.x, p.y))
+      if (this.isDraggingNode || !p.isDown) return
+
+      if (!shift.isDown || this.mode === 0) {
+        this.onDragCamera(p)
+        return
+      }
+
+      // TODO: whenever box changes, check which nodes are intersecting and update selected status
+      if (this.selectBox) {
+        this.selectBox.setDisplaySize(p.x - p.downX, p.y - p.downY)
+      } else {
+        this.selectBox = this.add
+          .rectangle(p.worldX, p.worldY, 1, 1)
+          .setOrigin(0, 0)
+          .setFillStyle(0xffffff, 0.1)
+      }
     })
 
     this.input.keyboard.on('keyup', (e) => {
@@ -132,7 +151,7 @@ export default class extends Phaser.Scene {
     const key = node.key
     const nodes = this.nodes.filter((w) => w.key.match(new RegExp(key)))
     this.nodes = this.nodes.filter((w) => !nodes.some((c) => c.key === w.key))
-    this.wireService.disconnect(node)
+    if (!node.key.match(/Wire/)) this.wireService.disconnect(node)
     nodes.forEach((w) => w.destroy())
   }
 
