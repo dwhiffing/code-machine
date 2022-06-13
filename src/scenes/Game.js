@@ -98,15 +98,21 @@ export default class extends Phaser.Scene {
 
   clearSelectBox = (p) => {
     this.selectBox.setPosition(0, 0)
-    this.selectBox.setDisplaySize(0, 0)
+    this.selectBox.setSize(0, 0)
   }
 
   handleSelectBox = (p) => {
-    if (this.selectBox.x == 0) {
+    const { Rectangle } = Phaser.Geom
+    const { width, height, x, y } = this.selectBox
+    if (x === 0 && y === 0) {
       this.selectBox.setPosition(p.worldX, p.worldY)
     }
-    this.selectBox.setDisplaySize(p.x - p.downX, p.y - p.downY)
-    // TODO: whenever box changes, check which nodes are intersecting and update selected status
+    this.selectBox.setSize(p.x - p.downX, p.y - p.downY)
+
+    const _x = width < 0 ? p.worldX : x
+    const _y = height < 0 ? p.worldY : y
+    const box = new Rectangle(_x, _y, Math.abs(width), Math.abs(height))
+    this.getEntities().forEach((e) => e.toggleSelect(box.contains(e.x, e.y)))
   }
 
   getEntities = () => [...this.nodeService.nodes, ...this.wireService.wires]

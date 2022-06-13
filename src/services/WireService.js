@@ -23,12 +23,7 @@ export default class WireService {
   }
 
   disconnect = (node) => {
-    let wires
-    if (node.key.match(/^Wire/)) {
-      wires = [this.wires.find((w) => w.key.match(new RegExp(node.key)))]
-    } else {
-      wires = this.wires.filter((w) => w.key.match(new RegExp(node.key)))
-    }
+    let wires = this.wires.filter((w) => w.key.match(new RegExp(node.key)))
     this.wires = this.wires.filter((w) => !wires.some((c) => c.key === w.key))
     wires.forEach((w) => w.destroy())
   }
