@@ -36,15 +36,27 @@ export default class extends Phaser.Scene {
   }
 
   onPointerDown = (p, objects) => {
+    this.clickStart = { x: p.x, y: p.y }
     this.dragStart = { x: this.camera.scrollX, y: this.camera.scrollY }
-    if (objects.length === 0 || !this.shiftKey.isDown) {
-      this.deselect()
-    }
+    this.clickedOnNothing = objects.length === 0
   }
 
-  onPointerUp = () => {
-    this.isDraggingNode = false
+  onPointerUp = (p, objects) => {
+    if (
+      Math.abs(this.selectBox.width) < 1 &&
+      (this.clickedOnNothing || objects.length === 0)
+    ) {
+      this.deselect()
+    }
+
     this.clearSelectBox()
+    this.isDraggingNode = false
+    this.clickedOnNothing = false
+
+    // store original position of selected objects for dragging
+    this.selectedMap = this.getEntities()
+      .filter((e) => e.selected)
+      .reduce((obj, e) => ({ ...obj, [e.key]: { x: e.x, y: e.y } }), {})
   }
 
   onPointerMove = (p) => {
@@ -57,11 +69,19 @@ export default class extends Phaser.Scene {
     }
   }
 
-  onDragNode = (_, object, x, y) => {
+  onDragNode = (p) => {
     if (this.mode !== 1) return
     this.isDraggingNode = true
-    object.setPosition(x, y)
-    object.children?.forEach((c) => c.setPosition(x, y))
+
+    // move all objects based on their position before draggin
+    this.getEntities()
+      .filter((e) => e.selected && !e.key.match(/Wire/))
+      .forEach((e) => {
+        const posX = this.selectedMap[e.key].x + p.x - this.clickStart.x
+        const posY = this.selectedMap[e.key].y + p.y - this.clickStart.y
+        e.sprite.setPosition(posX, posY)
+        e.sprite.children?.forEach((c) => c.setPosition(posX, posY))
+      })
   }
 
   onWheel = (p, o, x, y) => {
