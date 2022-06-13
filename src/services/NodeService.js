@@ -48,14 +48,18 @@ export default class NodeService {
       .getEntities()
       .filter((node) => node.selected)
       .forEach((node) => {
-        const nodes = this.nodes.filter((w) =>
-          w.key.match(new RegExp(node.key)),
-        )
-        this.nodes = this.nodes.filter(
-          (w) => !nodes.some((c) => c.key === w.key),
-        )
-        if (!node.key.match(/Wire/)) this.scene.wireService.disconnect(node)
-        nodes.forEach((w) => w.destroy())
+        if (node.key.match(/Wire/)) {
+          this.scene.wireService.disconnect(node)
+        } else {
+          this.scene.wireService.disconnect(node)
+          const nodes = this.nodes.filter((w) =>
+            w.key.match(new RegExp(node.key)),
+          )
+          this.nodes = this.nodes.filter(
+            (w) => !nodes.some((c) => c.key === w.key),
+          )
+          nodes.forEach((w) => w.destroy())
+        }
       })
   }
 
