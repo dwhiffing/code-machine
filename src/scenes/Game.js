@@ -53,10 +53,6 @@ export default class extends Phaser.Scene {
     this.clearSelectBox()
     this.isDraggingNode = false
     this.clickedOnNothing = false
-
-    this.getEntities()
-      .filter((e) => e.placing)
-      .forEach((e) => e.toggleSelect(false))
   }
 
   onPointerMove = (p) => {
@@ -64,13 +60,13 @@ export default class extends Phaser.Scene {
 
     if (this.shiftKey.isDown && this.mode === 1) {
       this.handleSelectBox(p)
-    } else {
+    } else if (!this.getEntities().some((e) => e.placing)) {
       this.onDragCamera(p)
     }
   }
 
   onDragNode = (p, object) => {
-    if (this.mode !== 1) return
+    if (this.mode !== 1 || this.getEntities().some((e) => e.placing)) return
     this.isDraggingNode = true
     let nodes = this.getSelectedNodes()
     if (nodes.length === 0) {
@@ -127,7 +123,8 @@ export default class extends Phaser.Scene {
     if (x === 0 && y === 0) {
       this.selectBox.setPosition(p.worldX, p.worldY)
     }
-    this.selectBox.setSize(p.x - p.downX, p.y - p.downY)
+    const scale = 1 / this.camera.zoom
+    this.selectBox.setSize((p.x - p.downX) * scale, (p.y - p.downY) * scale)
 
     const _x = width < 0 ? p.worldX : x
     const _y = height < 0 ? p.worldY : y

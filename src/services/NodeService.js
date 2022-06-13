@@ -9,6 +9,7 @@ export default class NodeService {
   constructor(scene) {
     this.scene = scene
     this.scene.input.on('pointermove', this.onPointerMove)
+    this.scene.input.on('pointerdown', this.onPointerDown)
   }
 
   loadLevel = (level) => {
@@ -27,7 +28,7 @@ export default class NodeService {
   }
 
   cloneSelectedNodes = () => {
-    this.cloneStart = {
+    this.sourcePos = {
       x: this.scene.input.activePointer.x,
       y: this.scene.input.activePointer.y,
     }
@@ -40,7 +41,11 @@ export default class NodeService {
     const map = {}
     this.scene.deselect()
     nodes.forEach((n) => {
-      const node = new SPRITES[n.key.split('-')[0]](this.scene, n.x, n.y)
+      // TODO: need to offset this position so that nodes are cloned to where pointer is
+      // rather than were source nodes are
+      const x = n.x
+      const y = n.y
+      const node = new SPRITES[n.key.split('-')[0]](this.scene, x, y)
       node.placing = true
       this.nodes.push(node)
       map[n.key] = node.key
@@ -55,10 +60,15 @@ export default class NodeService {
   }
 
   placeNode = () => {
-    const node = new Node(this.scene, 1200, 800)
+    if (this.scene.getEntities().some((e) => e.placing)) return
+    this.sourcePos = {
+      x: this.scene.input.activePointer.x,
+      y: this.scene.input.activePointer.y,
+    }
+    const node = new Node(this.scene, this.sourcePos.x, this.sourcePos.y)
     node.placing = true
-    node.sprite.setPosition(this.scene.input.activePointer)
     this.nodes.push(node)
+    this.updatePosMap()
   }
 
   connectSelectedNodes = () => {
@@ -96,10 +106,20 @@ export default class NodeService {
     if (nodes.length > 0) {
       this.moveNodes(
         nodes,
-        p.x - this.cloneStart?.x ?? 0,
-        p.y - this.cloneStart?.y ?? 0,
+        p.x - this.sourcePos?.x ?? 0,
+        p.y - this.sourcePos?.y ?? 0,
       )
     }
+  }
+
+  onPointerDown = (p) => {
+    this.scene
+      .getEntities()
+      .filter((e) => e.placing)
+      .forEach((e) => {
+        e.placing = false
+        e.toggleSelect(false)
+      })
   }
 
   exportLevelToClipboard = () => {
@@ -124,9 +144,10 @@ export default class NodeService {
 
   moveNodes = (nodes, diffX, diffY) => {
     // move all objects based on their position before draggin
+    const scale = 1 / this.scene.camera.zoom
     nodes.forEach((e) => {
-      const posX = this.posMap[e.key]?.x + diffX
-      const posY = this.posMap[e.key]?.y + diffY
+      const posX = this.posMap[e.key]?.x + diffX * scale
+      const posY = this.posMap[e.key]?.y + diffY * scale
       e.sprite.setPosition(posX, posY)
       e.sprite.children?.forEach((c) => c.setPosition(posX, posY))
     })

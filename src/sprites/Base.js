@@ -73,7 +73,6 @@ export class Base {
   toggleSelect = (_selected) => {
     let status = typeof _selected === 'undefined' ? !this.selected : _selected
     this.selected = status
-    this.placing = false
     this.updateHighlight()
   }
 
