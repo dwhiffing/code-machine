@@ -26,7 +26,6 @@ export default class extends Phaser.Scene {
     this.input.on('pointerdown', this.onPointerDown)
     this.input.on('pointerup', this.onPointerUp)
     this.input.on('pointermove', this.onPointerMove)
-    this.input.on('drag', this.onDragNode)
     this.input.on('wheel', this.onWheel)
     this.input.keyboard.on('keyup', this.onKeyUp)
   }
@@ -36,7 +35,6 @@ export default class extends Phaser.Scene {
   }
 
   onPointerDown = (p, objects) => {
-    this.clickStart = { x: p.x, y: p.y }
     this.dragStart = { x: this.camera.scrollX, y: this.camera.scrollY }
     this.clickedOnNothing = objects.length === 0
     this.nodeService.updatePosMap()
@@ -51,31 +49,17 @@ export default class extends Phaser.Scene {
     }
 
     this.clearSelectBox()
-    this.isDraggingNode = false
     this.clickedOnNothing = false
   }
 
   onPointerMove = (p) => {
-    if (this.isDraggingNode || !p.isDown) return
+    if (this.nodeService.isDraggingNode || !p.isDown) return
 
     if (this.shiftKey.isDown && this.mode === 1) {
       this.handleSelectBox(p)
     } else if (!this.getEntities().some((e) => e.placing)) {
       this.onDragCamera(p)
     }
-  }
-
-  onDragNode = (p, object) => {
-    if (this.mode !== 1 || this.getEntities().some((e) => e.placing)) return
-    this.isDraggingNode = true
-    let nodes = this.getSelectedNodes()
-    if (nodes.length === 0) {
-      nodes = this.getEntities().filter((e) => e.key === object._parent.key)
-    }
-
-    const diffX = p.x - this.clickStart.x
-    const diffY = p.y - this.clickStart.y
-    this.nodeService.moveNodes(nodes, diffX, diffY)
   }
 
   onWheel = (p, o, x, y) => {
@@ -131,9 +115,6 @@ export default class extends Phaser.Scene {
     const box = new Rectangle(_x, _y, Math.abs(width), Math.abs(height))
     this.getEntities().forEach((e) => e.toggleSelect(box.contains(e.x, e.y)))
   }
-
-  getSelectedNodes = () =>
-    this.getEntities().filter((e) => e.selected && !e.key.match(/Wire/))
 
   getEntities = () => [...this.nodeService.nodes, ...this.wireService.wires]
 }

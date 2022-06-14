@@ -10,6 +10,54 @@ export default class NodeService {
     this.scene = scene
     this.scene.input.on('pointermove', this.onPointerMove)
     this.scene.input.on('pointerdown', this.onPointerDown)
+    this.scene.input.on('pointerup', this.onPointerUp)
+    this.scene.input.on('drag', this.onDragNode)
+  }
+
+  onPointerMove = (p) => {
+    const nodes = this.scene.getEntities().filter((p) => p.placing)
+    if (nodes.length > 0) {
+      this.moveNodes(
+        nodes,
+        p.x - this.sourcePos?.x ?? 0,
+        p.y - this.sourcePos?.y ?? 0,
+      )
+    }
+  }
+
+  onPointerDown = (p) => {
+    this.clickStart = { x: p.x, y: p.y }
+    this.scene
+      .getEntities()
+      .filter((e) => e.placing)
+      .forEach((e) => {
+        e.placing = false
+        e.toggleSelect(false)
+      })
+  }
+
+  onPointerUp = (p) => {
+    this.isDraggingNode = false
+  }
+
+  onDragNode = (p, object) => {
+    if (
+      this.scene.mode !== 1 ||
+      this.scene.getEntities().some((e) => e.placing)
+    )
+      return
+
+    this.isDraggingNode = true
+    let nodes = this.getSelectedNodes()
+    if (nodes.length === 0) {
+      nodes = this.scene
+        .getEntities()
+        .filter((e) => e.key === object._parent.key)
+    }
+
+    const diffX = p.x - this.clickStart.x
+    const diffY = p.y - this.clickStart.y
+    this.moveNodes(nodes, diffX, diffY)
   }
 
   loadLevel = (level) => {
@@ -101,27 +149,6 @@ export default class NodeService {
       })
   }
 
-  onPointerMove = (p) => {
-    const nodes = this.scene.getEntities().filter((p) => p.placing)
-    if (nodes.length > 0) {
-      this.moveNodes(
-        nodes,
-        p.x - this.sourcePos?.x ?? 0,
-        p.y - this.sourcePos?.y ?? 0,
-      )
-    }
-  }
-
-  onPointerDown = (p) => {
-    this.scene
-      .getEntities()
-      .filter((e) => e.placing)
-      .forEach((e) => {
-        e.placing = false
-        e.toggleSelect(false)
-      })
-  }
-
   exportLevelToClipboard = () => {
     const exported = this.scene.getEntities().map((c) => {
       let e = { key: c.key }
@@ -152,4 +179,7 @@ export default class NodeService {
       e.sprite.children?.forEach((c) => c.setPosition(posX, posY))
     })
   }
+
+  getSelectedNodes = () =>
+    this.scene.getEntities().filter((e) => e.selected && !e.key.match(/Wire/))
 }

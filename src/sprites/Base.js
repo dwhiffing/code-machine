@@ -7,7 +7,8 @@ export class Base {
     this.disabled = false
     this.hovered = false
     this.sprite = sprite
-    sprite._parent = this._value = 0
+    sprite._parent = this
+    this._value = 0
 
     sprite.on('pointerout', () => this.onHover(false))
     sprite.on('pointerover', () => this.onHover(true))
