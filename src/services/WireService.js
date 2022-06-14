@@ -97,10 +97,8 @@ export default class WireService {
           : null
         if (_switch) {
           _switch.disabled = true
-          _switch.value = e.value
-          if (true) {
-            _switch.value = e.value ? 0 : 1
-          }
+          _switch.value =
+            e.polarity === -1 ? (e.value ? 0 : 1) : e.value ? 1 : 0
         }
       }
     })

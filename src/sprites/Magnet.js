@@ -6,5 +6,16 @@ export class Magnet extends Base {
     sprite.setInteractive()
     scene.input.setDraggable(sprite)
     super(scene, sprite, key, 'Magnet')
+    this.polarity = 1
+  }
+
+  get polarity() {
+    return this._polarity
+  }
+
+  set polarity(v) {
+    this._polarity = v
+    const size = v === 1 ? 100 : 75
+    this.sprite.setDisplaySize(size, size)
   }
 }

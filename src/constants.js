@@ -99,7 +99,7 @@ export const FEEDBACK_LEVEL = [
   { key: 'Node-43', x: 899, y: 446 },
   { key: 'Switch-48', x: 684, y: 415, v: 1 },
   { key: 'Switch-53', x: 1022, y: 189 },
-  { key: 'Magnet-57', x: 1055, y: 400 },
+  { key: 'Magnet-57', x: 1055, y: 400, p: -1 },
   {
     key: 'Wire-Light-29:Cell-35',
     input: 'Light-29',
