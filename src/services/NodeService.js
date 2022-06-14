@@ -63,7 +63,7 @@ export default class NodeService {
   loadLevel = (level) => {
     this.nodes = level
       .filter((o) => !o.key.match(/^Wire/))
-      .map((o) => new SPRITES[o.key.split('-')[0]](this.scene, o.x, o.y))
+      .map((o) => new SPRITES[o.key.split('-')[0]](this.scene, o.x, o.y, o.key))
 
     level
       .filter((o) => o.key.match(/^Wire/))
@@ -80,7 +80,7 @@ export default class NodeService {
       x: this.scene.input.activePointer.x,
       y: this.scene.input.activePointer.y,
     }
-    const nodes = this.scene.getSelectedNodes()
+    const nodes = this.getSelectedNodes()
     const wires = this.scene
       .getEntities()
       .filter((e) => e.selected && e.key.match(/Wire/))
@@ -107,13 +107,17 @@ export default class NodeService {
     this.updatePosMap()
   }
 
-  placeNode = () => {
+  placeNode = (type) => {
     if (this.scene.getEntities().some((e) => e.placing)) return
     this.sourcePos = {
-      x: this.scene.input.activePointer.x,
-      y: this.scene.input.activePointer.y,
+      x: this.scene.input.activePointer.worldX,
+      y: this.scene.input.activePointer.worldY,
     }
-    const node = new Node(this.scene, this.sourcePos.x, this.sourcePos.y)
+    const node = new SPRITES[type](
+      this.scene,
+      this.sourcePos.x,
+      this.sourcePos.y,
+    )
     node.placing = true
     this.nodes.push(node)
     this.updatePosMap()

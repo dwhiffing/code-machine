@@ -3,13 +3,13 @@ import { Base } from './Base'
 
 const size = 70
 export class Cell extends Base {
-  constructor(scene, x = 0, y = 0, type) {
+  constructor(scene, x = 0, y = 0, key, type) {
     const bulbKey = drawCanvas(scene, createBulb(size), size)
     const sprite = scene.add.image(x, y, bulbKey)
     const shape = new Phaser.Geom.Circle(size * 1.5, size * 1.5, size / 2)
     sprite.setInteractive(shape, Phaser.Geom.Circle.Contains)
     scene.input.setDraggable(sprite)
-    super(scene, sprite, type)
+    super(scene, sprite, key, type)
   }
 
   highlight = () => {
@@ -41,16 +41,18 @@ export class Cell extends Base {
     this.glow.destroy()
   }
 }
+
 export class PositiveCell extends Cell {
-  constructor(scene, x = 0, y = 0) {
-    super(scene, x, y, 'PositiveCell')
+  constructor(scene, x = 0, y = 0, key) {
+    super(scene, x, y, key, 'PositiveCell')
 
     this.drawGlow(size, 1)
   }
 }
+
 export class NegativeCell extends Cell {
-  constructor(scene, x = 0, y = 0) {
-    super(scene, x, y, 'NegativeCell')
+  constructor(scene, x = 0, y = 0, key) {
+    super(scene, x, y, key, 'NegativeCell')
 
     this.drawGlow(size, 0)
   }

@@ -4,11 +4,11 @@ const { Angle, Distance, RadToDeg } = Phaser.Math
 const OFFSET = Math.PI / 2
 
 export class Wire extends Base {
-  constructor(scene, input, output) {
+  constructor(scene, input, output, key) {
     const dist = Distance.BetweenPoints(input, output)
     const sprite = scene.add.rectangle(0, 0, 10, dist, 0x333333)
     sprite.setInteractive()
-    super(scene, sprite, 'Wire')
+    super(scene, sprite, key, 'Wire')
     this.key = `Wire-${input.key}:${output.key}`
     this.scene = scene
     this.input = input

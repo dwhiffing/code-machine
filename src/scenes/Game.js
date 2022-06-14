@@ -1,4 +1,4 @@
-import { LEVEL } from '../constants'
+import { CAT_MACHINE_LEVEL } from '../constants'
 import WireService from '../services/WireService'
 import NodeService from '../services/NodeService'
 
@@ -14,7 +14,7 @@ export default class extends Phaser.Scene {
     this.camera = this.cameras.main
     this.nodeService = new NodeService(this)
     this.wireService = new WireService(this)
-    this.nodeService.loadLevel(LEVEL)
+    this.nodeService.loadLevel(CAT_MACHINE_LEVEL)
 
     this.selectBox = this.add
       .rectangle(0, 0, 1, 1)
@@ -73,7 +73,12 @@ export default class extends Phaser.Scene {
     if (e.key === 'p') this.nodeService.exportLevelToClipboard()
 
     if (this.mode === 1) {
-      if (e.key === '1') this.nodeService.placeNode()
+      if (e.key === '1') this.nodeService.placeNode('Node')
+      if (e.key === '2') this.nodeService.placeNode('Light')
+      if (e.key === '3') this.nodeService.placeNode('Switch')
+      if (e.key === '4') this.nodeService.placeNode('Magnet')
+      if (e.key === '5') this.nodeService.placeNode('PositiveCell')
+      if (e.key === '6') this.nodeService.placeNode('NegativeCell')
       if (e.key === 'c') this.nodeService.connectSelectedNodes()
       if (e.key === 'v') this.nodeService.cloneSelectedNodes()
       if (e.key === 'x') this.nodeService.deleteSelectedNodes()

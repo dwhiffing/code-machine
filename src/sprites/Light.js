@@ -3,13 +3,13 @@ import { Base } from './Base'
 
 const size = 100
 export class Light extends Base {
-  constructor(scene, x = 0, y = 0) {
+  constructor(scene, x = 0, y = 0, key) {
     const bulbKey = drawCanvas(scene, createBulb(size), size)
     const sprite = scene.add.image(x, y, bulbKey)
     const shape = new Phaser.Geom.Circle(size * 1.5, size * 1.5, size / 2)
     sprite.setInteractive(shape, Phaser.Geom.Circle.Contains)
     scene.input.setDraggable(sprite)
-    super(scene, sprite, 'Light')
+    super(scene, sprite, key, 'Light')
 
     this.drawGlow(size)
   }
