@@ -62,8 +62,8 @@ export default class WireService {
         graph.addEdge(e.output.key, e.input.key)
       }
     })
-    const start = entities.find((e) => e.key.match(/NegativeCell/))
-    const end = entities.find((e) => e.key.match(/PositiveCell/))
+    const start = entities.find((e) => e.key.match(/Cell/) && e.polarity === -1)
+    const end = entities.find((e) => e.key.match(/Cell/) && e.polarity === 1)
     if (!start || !end) return
 
     // power all paths from negative cell to positive cell

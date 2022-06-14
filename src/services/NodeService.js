@@ -1,9 +1,9 @@
-import { NegativeCell, PositiveCell } from '../sprites/Cell'
+import { Cell } from '../sprites/Cell'
 import { Light } from '../sprites/Light'
 import { Magnet } from '../sprites/Magnet'
 import { Node } from '../sprites/Node'
 import { Switch } from '../sprites/Switch'
-const SPRITES = { Magnet, NegativeCell, PositiveCell, Light, Node, Switch }
+const SPRITES = { Magnet, Cell, Light, Node, Switch }
 
 export default class NodeService {
   constructor(scene) {
@@ -67,6 +67,7 @@ export default class NodeService {
         const Sprite = SPRITES[o.key.split('-')[0]]
         const node = new Sprite(this.scene, o.x, o.y, o.key)
         node.value = o.v
+        node.polarity = o.p
         return node
       })
 
