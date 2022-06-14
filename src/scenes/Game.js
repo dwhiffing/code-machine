@@ -87,7 +87,7 @@ export default class extends Phaser.Scene {
 
   toggleEditMode = () => {
     this.mode = this.mode ? 0 : 1
-    this.getEntities().forEach((c) => c.text.setAlpha(this.mode))
+    this.getEntities().forEach((c) => c.text?.setAlpha(this.mode))
     this.deselect()
   }
 

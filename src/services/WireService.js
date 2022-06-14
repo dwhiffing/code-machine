@@ -40,7 +40,7 @@ export default class WireService {
       }
     })
 
-    // create graph of nodes/wires
+    // create graph of nodes/wires. Ignore closed switches
     const graph = new Graph({ type: 'undirected' })
     this.scene
       .getEntities()
@@ -49,11 +49,12 @@ export default class WireService {
         if (e.key.match(/Switch/) && e.value !== 1) return
         graph.addNode(e.key)
       })
+
     this.wires.forEach((e) => {
       // if input and output are switch/magnet, dont connect in graph
       if (
-        e.input.key.match(/Switch|Magnet/) &&
-        e.output.key.match(/Switch|Magnet/)
+        (e.input.key.match(/Switch/) && e.output.key.match(/Magnet/)) ||
+        (e.input.key.match(/Magnet/) && e.output.key.match(/Switch/))
       ) {
         return
       }

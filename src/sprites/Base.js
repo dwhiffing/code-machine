@@ -17,6 +17,7 @@ export class Base {
     this.text = scene.add
       .text(sprite.x, sprite.y, this.key.replace(/Positive|Negative/, ''), {
         align: 'center',
+        fontSize: 11,
       })
       .setOrigin(0.5)
       .setAlpha(scene.mode)
