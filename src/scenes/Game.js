@@ -81,6 +81,7 @@ export default class extends Phaser.Scene {
       if (e.key === 'c') this.nodeService.connectSelectedNodes()
       if (e.key === 'v') this.nodeService.cloneSelectedNodes()
       if (e.key === 'x') this.nodeService.deleteSelectedNodes()
+      if (e.key === 'z') this.nodeService.negateSelectedNodes()
     }
   }
 

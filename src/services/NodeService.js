@@ -81,6 +81,15 @@ export default class NodeService {
       )
   }
 
+  negateSelectedNodes = () => {
+    const nodes = this.getSelectedNodes()
+    nodes.forEach((n) => {
+      if (typeof n.polarity !== 'undefined') {
+        n.polarity *= -1
+      }
+    })
+  }
+
   cloneSelectedNodes = () => {
     this.sourcePos = {
       x: this.scene.input.activePointer.x,
