@@ -91,3 +91,28 @@ export const CAT_MACHINE_LEVEL = [
   { key: 'Wire-Switch-29:Switch-34', input: 'Switch-29', output: 'Switch-34' },
   { key: 'Wire-Switch-31:Node-35', input: 'Switch-31', output: 'Node-35' },
 ]
+
+export const FEEDBACK_LEVEL = [
+  { key: 'Light-29', x: 1430, y: 423 },
+  { key: 'PositiveCell-35', x: 1080, y: 693 },
+  { key: 'NegativeCell-36', x: 962, y: 697 },
+  { key: 'Node-43', x: 899, y: 446 },
+  { key: 'Switch-48', x: 684, y: 415, v: 1 },
+  { key: 'Switch-53', x: 1022, y: 189 },
+  { key: 'Magnet-57', x: 1055, y: 400 },
+  {
+    key: 'Wire-Light-29:PositiveCell-35',
+    input: 'Light-29',
+    output: 'PositiveCell-35',
+  },
+  { key: 'Wire-Node-43:Switch-48', input: 'Node-43', output: 'Switch-48' },
+  { key: 'Wire-Switch-48:Switch-53', input: 'Switch-48', output: 'Switch-53' },
+  { key: 'Wire-Light-29:Switch-53', input: 'Light-29', output: 'Switch-53' },
+  {
+    key: 'Wire-NegativeCell-36:Magnet-57',
+    input: 'NegativeCell-36',
+    output: 'Magnet-57',
+  },
+  { key: 'Wire-Node-43:Magnet-57', input: 'Node-43', output: 'Magnet-57' },
+  { key: 'Wire-Switch-53:Magnet-57', input: 'Switch-53', output: 'Magnet-57' },
+]

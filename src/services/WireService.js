@@ -87,7 +87,9 @@ export default class WireService {
       if (e?.key.match(/^Magnet/)) {
         // find connected switches and set their value to magnet value
         const wires = entities.filter((c) =>
-          c.key.match(new RegExp(`Wire.+(Switch|${e.key}).+(Switch|${e.key})`)),
+          c.key.match(
+            new RegExp(`(Wire.+Switch.+${e.key})|Wire.+${e.key}.+Switch`),
+          ),
         )
         const switchKey = wires[0]?.key.match(/(Switch-\d+)/)[0]
         const _switch = switchKey
@@ -96,6 +98,9 @@ export default class WireService {
         if (_switch) {
           _switch.disabled = true
           _switch.value = e.value
+          if (true) {
+            _switch.value = e.value ? 0 : 1
+          }
         }
       }
     })
