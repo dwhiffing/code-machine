@@ -19,8 +19,8 @@ export default class NodeService {
     if (nodes.length > 0) {
       this.moveNodes(
         nodes,
-        p.x - this.sourcePos?.x ?? 0,
-        p.y - this.sourcePos?.y ?? 0,
+        p.worldX - this.sourcePos?.x ?? 0,
+        p.worldY - this.sourcePos?.y ?? 0,
       )
     }
   }
@@ -63,7 +63,12 @@ export default class NodeService {
   loadLevel = (level) => {
     this.nodes = level
       .filter((o) => !o.key.match(/^Wire/))
-      .map((o) => new SPRITES[o.key.split('-')[0]](this.scene, o.x, o.y, o.key))
+      .map((o) => {
+        const Sprite = SPRITES[o.key.split('-')[0]]
+        const node = new Sprite(this.scene, o.x, o.y, o.key)
+        node.value = o.v
+        return node
+      })
 
     level
       .filter((o) => o.key.match(/^Wire/))
@@ -159,7 +164,7 @@ export default class NodeService {
       if (e.key.match(/^Wire/)) {
         return { ...e, input: c.input.key, output: c.output.key }
       } else {
-        return { ...e, x: Math.round(c.x), y: Math.round(c.y) }
+        return { ...e, x: Math.round(c.x), y: Math.round(c.y), v: c.value }
       }
     })
     navigator.clipboard.writeText(JSON.stringify(exported))
