@@ -108,7 +108,10 @@ export default class NodeService {
       // rather than were source nodes are
       const x = n.x
       const y = n.y
-      const node = new SPRITES[n.key.split('-')[0]](this.scene, x, y)
+      const type = n.key.split('-')[0]
+      const node = new SPRITES[type](this.scene, x, y)
+      node.value = n.value
+      node.polarity = n.polarity
       node.placing = true
       this.nodes.push(node)
       map[n.key] = node.key
@@ -174,7 +177,13 @@ export default class NodeService {
       if (e.key.match(/^Wire/)) {
         return { ...e, input: c.input.key, output: c.output.key }
       } else {
-        return { ...e, x: Math.round(c.x), y: Math.round(c.y), v: c.value }
+        return {
+          ...e,
+          x: Math.round(c.x),
+          y: Math.round(c.y),
+          v: c.value,
+          p: c.polarity,
+        }
       }
     })
     navigator.clipboard.writeText(JSON.stringify(exported))

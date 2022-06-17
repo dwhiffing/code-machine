@@ -1,4 +1,4 @@
-import { FEEDBACK_LEVEL } from '../constants'
+import * as LEVELS from '../constants'
 import WireService from '../services/WireService'
 import NodeService from '../services/NodeService'
 
@@ -14,7 +14,7 @@ export default class extends Phaser.Scene {
     this.camera = this.cameras.main
     this.nodeService = new NodeService(this)
     this.wireService = new WireService(this)
-    this.nodeService.loadLevel(FEEDBACK_LEVEL)
+    this.nodeService.loadLevel(LEVELS.FEEDBACK_LEVEL)
 
     this.selectBox = this.add
       .rectangle(0, 0, 1, 1)
