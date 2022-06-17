@@ -62,24 +62,32 @@ export default class WireService {
         graph.addEdge(e.output.key, e.input.key)
       }
     })
-    const start = entities.find((e) => e.key.match(/Cell/) && e.polarity === -1)
-    const end = entities.find((e) => e.key.match(/Cell/) && e.polarity === 1)
-    if (!start || !end) return
 
-    // power all paths from negative cell to positive cell
-    allSimplePaths(graph, start.key, end.key).forEach((_path) => {
-      if (!_path) return
-      const path = _path?.map((k) => entities.find((e) => e.key === k)) || []
-      path.forEach((node, i) => {
-        if (i === 0) return
-        // all nodes/wires on a path are considered powered
-        const a = `Wire-${path[i - 1].key}:${node.key}`
-        const b = `Wire-${node.key}:${path[i - 1].key}`
-        const wire = entities.find((e) => e.key === a || e.key === b)
-        if (wire) wire.value = 1
-        if (!node.key.match(/Switch|Cell/)) {
-          node.value = 1
-        }
+    const starts = entities.filter(
+      (e) => e.key.match(/Cell/) && e.polarity === -1,
+    )
+    const ends = entities.filter((e) => e.key.match(/Cell/) && e.polarity === 1)
+    if (starts.length === 0 || ends.length === 0) return
+
+    starts.forEach((start) => {
+      ends.forEach((end) => {
+        // power all paths from negative cell to positive cell
+        allSimplePaths(graph, start.key, end.key).forEach((_path) => {
+          if (!_path) return
+          const path =
+            _path?.map((k) => entities.find((e) => e.key === k)) || []
+          path.forEach((node, i) => {
+            if (i === 0) return
+            // all nodes/wires on a path are considered powered
+            const a = `Wire-${path[i - 1].key}:${node.key}`
+            const b = `Wire-${node.key}:${path[i - 1].key}`
+            const wire = entities.find((e) => e.key === a || e.key === b)
+            if (wire) wire.value = 1
+            if (!node.key.match(/Switch|Cell/)) {
+              node.value = 1
+            }
+          })
+        })
       })
     })
 
