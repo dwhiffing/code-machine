@@ -1,12 +1,11 @@
-let id = 0
 export class Base {
   constructor(scene, sprite, key, type = 'base') {
     if (key) {
       const _id = Number(key.split('-')[1])
-      if (_id > id) id = _id
+      if (_id >= scene._idRef) scene._idRef = _id + 1
       this.key = key
     } else {
-      this.key = `${type}-${id++}`
+      this.key = `${type}-${scene._idRef++}`
     }
     this.scene = scene
     this.selected = false

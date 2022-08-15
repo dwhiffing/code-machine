@@ -1,0 +1,34 @@
+allow selecting levels during run time
+
+should switch not be toggled by magnet until the next phase? double check flip flop in slo mo to see if its right
+
+allow custom labels/keys
+
+make a level with many gate examples
+
+make adding machine
+
+make groups
+  use hotkey to group/ungroup selected stuff
+  when its a group, clicking any node selects all of them
+
+ensure that clones start from mouse position
+when checking power, check one wire/node getting powered at a time?
+power flow animation for wires
+
+
+done
+  add mode toggle
+  make switches work
+  make power flow work
+  make relay
+    add magnet: when connected as input to switch, overrides switch value with its own input
+    relay is a magnet connected to a switch
+  add camera controls
+  add box selection
+  allow dragging multiple objects
+  allow copying and pasting
+  fix select box when zooming
+  should be able to drag a thing without selecting it
+  make some logic gates
+  make a flip flop

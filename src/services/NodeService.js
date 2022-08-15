@@ -1,3 +1,4 @@
+import { LEVELS } from '../constants'
 import { Cell } from '../sprites/Cell'
 import { Light } from '../sprites/Light'
 import { Magnet } from '../sprites/Magnet'
@@ -73,12 +74,13 @@ export default class NodeService {
 
     level
       .filter((o) => o.key.match(/^Wire/))
-      .forEach((o) =>
+      .forEach((o) => {
+        const [input, output] = o.key.replace('Wire-', '').split(':')
         this.scene.wireService.connect(
-          this.nodes.find((n) => n.key === o.input),
-          this.nodes.find((n) => n.key === o.output),
-        ),
-      )
+          this.nodes.find((n) => n.key === input),
+          this.nodes.find((n) => n.key === output),
+        )
+      })
   }
 
   negateSelectedNodes = () => {
@@ -173,21 +175,22 @@ export default class NodeService {
 
   exportLevelToClipboard = () => {
     const exported = this.scene.getEntities().map((c) => {
-      let e = { key: c.key }
-      if (e.key.match(/^Wire/)) {
-        return { ...e, input: c.input.key, output: c.output.key }
-      } else {
-        return {
-          ...e,
-          x: Math.round(c.x),
-          y: Math.round(c.y),
-          v: c.value,
-          p: c.polarity,
-        }
+      let entity = { key: c.key }
+      if (entity.key.match(/^Wire/)) return entity
+      return {
+        ...entity,
+        x: Math.round(c.x),
+        y: Math.round(c.y),
+        v: c.value,
+        p: c.polarity,
       }
     })
-    navigator.clipboard.writeText(JSON.stringify(exported))
-    console.log('copied level')
+    const cloned = { ...LEVELS }
+    cloned[this.scene.levelName] = exported
+    navigator.clipboard.writeText(
+      'export const LEVELS = ' + JSON.stringify(cloned),
+    )
+    console.log('copied levels')
   }
 
   updatePosMap = () => {

@@ -4,6 +4,8 @@ export default class extends Phaser.Scene {
   }
 
   preload() {
-    this.scene.start('Game')
+    this.scene.start('Game', {
+      level: Number(new URLSearchParams(location.search).get('l')),
+    })
   }
 }

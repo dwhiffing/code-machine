@@ -1,4 +1,4 @@
-import * as LEVELS from '../constants'
+import { LEVELS } from '../constants'
 import WireService from '../services/WireService'
 import NodeService from '../services/NodeService'
 
@@ -7,14 +7,19 @@ export default class extends Phaser.Scene {
     super({ key: 'Game' })
   }
 
-  init() {}
+  init(params) {
+    this._idRef = 0
+    this.levelIndex = 0
+    if (typeof params?.level === 'number') this.levelIndex = params.level
+  }
 
   create() {
     this.mode = 0
     this.camera = this.cameras.main
     this.nodeService = new NodeService(this)
     this.wireService = new WireService(this)
-    this.nodeService.loadLevel(LEVELS.FEEDBACK_LEVEL)
+    this.levelName = Object.keys(LEVELS)[this.levelIndex]
+    this.nodeService.loadLevel(LEVELS[this.levelName])
 
     this.selectBox = this.add
       .rectangle(0, 0, 1, 1)
@@ -71,6 +76,8 @@ export default class extends Phaser.Scene {
   onKeyUp = (e) => {
     if (e.key === ' ') this.toggleEditMode()
     if (e.key === 'p') this.nodeService.exportLevelToClipboard()
+    if (e.key === 'm') this.changeLevel(1)
+    if (e.key === 'n') this.changeLevel(-1)
 
     if (this.mode === 1) {
       if (e.key === '1') this.nodeService.placeNode('Node')
@@ -83,6 +90,14 @@ export default class extends Phaser.Scene {
       if (e.key === 'x') this.nodeService.deleteSelectedNodes()
       if (e.key === 'z') this.nodeService.negateSelectedNodes()
     }
+  }
+
+  changeLevel = (dir) => {
+    const numLevels = Object.keys(LEVELS).length - 1
+    this.levelIndex += dir
+    if (this.levelIndex < 0) this.levelIndex = 0
+    if (this.levelIndex >= numLevels) this.levelIndex = numLevels
+    this.scene.start('Game', { level: this.levelIndex })
   }
 
   toggleEditMode = () => {
